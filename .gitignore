@@ -1,0 +1,12 @@
+/datasets/sql_databases/binance_historical_data.db
+/datasets/sql_databases/
+/datasets/plots/
+/datasets/daily/
+datasets/sql_databases
+alpaca_config.py
+binance_config.py
+chromedriver
+chromedriver_94
+datasets/sql_databases/yahoo_databases
+
+quandl_config.py

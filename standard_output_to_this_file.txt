@@ -1,0 +1,31 @@
+ 
+levels_with_touches_before_is_in
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
+levels_with_touches_after_is_in
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
+
+dictitonary_of_high_levels_with_counter
+ {}
+levels_with_touches_end_of_program
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
+levels_with_touches_before_is_in
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
+levels_with_touches_after_is_in
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
+
+dictitonary_of_high_levels_with_counter
+ {}
+levels_with_touches_end_of_program
+ Empty DataFrame
+Columns: [index, open_time, open, high, low, close, volume, close_time, qav, num_trades, taker_base_vol, taker_quote_vol, ignore, Trading_pair, number_of_same_highs, NaN_highs]
+Index: []
