@@ -283,6 +283,7 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
             #print ( "\nbtc_pairs_list=\n" , btc_pairs_list )
             exchange_object = getattr ( ccxt , exchange ) ()
             exchange_object.load_markets ()
+            exchange_object.enableRateLimit = True
 
             for usdt_pair in usdt_pairs_list:
                 try:
@@ -315,138 +316,7 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
                                      connection_to_usdt_trading_pairs_ohlcv ,
                                      if_exists = 'replace' )
 
-                    last_several_days_slice_df = data_df.tail ( this_many_last_days )
-                    # last_several_days_slice_df=\
-                    #     last_several_days_slice_df.drop_duplicates(subset = ["high",'low'])
-                    print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
-                    #time.sleep ( 300000 )
-                    if last_several_days_slice_df.duplicated(subset = 'high',
-                                                             keep = False).sum()==len(last_several_days_slice_df):
-                        print(f"all duplicated highs are found in {usdt_pair} on {exchange}")
-                        continue
 
-                    print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string() )
-                    last_several_days_highs_slice_Series = \
-                        last_several_days_slice_df['high'].squeeze()
-                    last_several_days_lows_slice_Series = \
-                        last_several_days_slice_df['low'].squeeze()
-
-                    for row_number_in_highs in range(last_several_days_highs_slice_Series.size):
-                        for row_number_in_lows in range(last_several_days_lows_slice_Series.size):
-                            daily_high=last_several_days_highs_slice_Series.iloc[row_number_in_highs-1]
-                            daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows-1]
-                            if daily_high == daily_low :
-
-                                # print ( f'found mirror horizontal level '
-                                #         f'in {usdt_pair} on {exchange}.')
-                                # print ("last_several_days_highs_slice_Series\n",
-                                #        last_several_days_highs_slice_Series)
-                                # print ( "last_several_days_lows_slice_Series\n" ,
-                                #         last_several_days_lows_slice_Series )
-                                # print ( "daily_high\n" ,
-                                #         daily_high )
-                                # print ( "row_number_in_highs\n" ,
-                                #         row_number_in_highs )
-                                # print ( "row_number_in_lows\n" ,
-                                #         row_number_in_lows )
-                                # print ( "last_several_days_highs_slice_Series.iat[row_number_in_highs]\n" ,
-                                #         last_several_days_highs_slice_Series.iat[row_number_in_highs-1] )
-                                # print ( "last_several_days_highs_slice_Series.size\n" ,
-                                #         last_several_days_highs_slice_Series.size )
-
-
-                                print ( "daily_low\n" ,
-                                        daily_low )
-                                print ( "daily_high\n" ,
-                                        daily_high )
-                                if row_number_in_lows > 1 and row_number_in_lows < last_several_days_lows_slice_Series.size:
-                                    print("found not boundary low")
-
-                                if row_number_in_highs>1 and row_number_in_highs<last_several_days_highs_slice_Series.size:
-                                    print("found not boundary high")
-                                    if row_number_in_lows>1 and row_number_in_lows<last_several_days_lows_slice_Series.size:
-                                        prev_daily_high=last_several_days_highs_slice_Series.iloc[row_number_in_highs-2]
-                                        next_daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs]
-                                        prev_daily_low = last_several_days_lows_slice_Series.iloc[
-                                            row_number_in_lows - 2]
-                                        next_daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows]
-
-                                        print ( "prev_daily_high\n" ,prev_daily_high )
-                                        print ( "next_daily_high\n" , next_daily_high )
-                                        print ( "prev_daily_low\n" , prev_daily_low )
-                                        print ( "next_daily_low\n" , next_daily_low )
-                                        if prev_daily_low > daily_low and next_daily_low > daily_low:
-                                            print ( "found legit low" )
-
-
-                                        if prev_daily_high<daily_high and next_daily_high<daily_high:
-                                            print ( "found legit high" )
-                                            if prev_daily_low>daily_low and next_daily_low>daily_low:
-                                                print ("level is legit\n")
-                                                print ( "last_several_days_lows_slice_Series\n" ,
-                                                        last_several_days_lows_slice_Series )
-
-                                                list_of_tuples_of_lows=list(last_several_days_lows_slice_Series.items())
-                                                print ( "list_of_tuples_of_lows\n" , list_of_tuples_of_lows )
-
-                                                tuple_of_legit_low_level=list_of_tuples_of_lows[row_number_in_lows - 1]
-                                                print ( "tuple_of_legit_low_level\n" ,
-                                                        tuple_of_legit_low_level )
-                                                list_of_tuples_of_highs = list (
-                                                    last_several_days_highs_slice_Series.items () )
-                                                print("list_of_tuples_of_highs\n",list_of_tuples_of_highs)
-                                                tuple_of_legit_high_level = list_of_tuples_of_highs[
-                                                    row_number_in_highs - 1]
-                                                print ( "tuple_of_legit_high_level\n" , tuple_of_legit_high_level )
-
-                                                print ( "dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] )\n" ,
-                                                        dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0]/ 1000.0 ) )
-
-                                                print ( "dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0] )" ,
-                                                        dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0]/ 1000.0 ) )
-                                                #time.sleep ( 300000 )
-
-
-
-
-                                                mirror_level_df.loc[0,'USDT_pair']=usdt_pair
-                                                mirror_level_df.loc[0,'exchange'] = exchange
-                                                mirror_level_df.loc[0,'mirror_level'] = daily_low
-                                                mirror_level_df.loc[0,'timestamp_for_low'] =\
-                                                    tuple_of_legit_low_level[0]
-                                                mirror_level_df.loc[0,'timestamp_for_high'] =\
-                                                    tuple_of_legit_high_level[0]
-                                                mirror_level_df.loc[0,'low'] = daily_low
-                                                mirror_level_df.loc[0,'high'] = daily_high
-                                                mirror_level_df.loc[0,'open_time_of_candle_with_legit_low'] = \
-                                                    dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0]/ 1000.0  )
-                                                mirror_level_df.loc[0 , 'open_time_of_candle_with_legit_high'] = \
-                                                    dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0]/ 1000.0  )
-
-                                                print('mirror_level_df\n',mirror_level_df)
-
-                                                mirror_level_df.to_sql ( "mirror_levels" ,
-                                                                         connection_to_btc_and_usdt_trading_pairs ,
-                                                                         if_exists = 'append' ,index=False)
-
-
-                                                if usdt_pair not in dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges:
-                                                    dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges[usdt_pair] = \
-                                                        {exchange}
-                                                    print('dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges\n',
-                                                          dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges)
-                                                    print ( 'len(dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges)\n' ,
-                                                            len(dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges) )
-                                                else:
-
-                                                    dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges[usdt_pair].add(exchange)
-                                                    print ( 'dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges\n' ,
-                                                            dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges )
-                                                    print ( 'len(dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges)\n' ,
-                                                            len ( dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges ) )
-
-                            else:
-                                continue
                 except:
                     continue
 
@@ -478,3 +348,5 @@ overall_time=end_time-start_time
 print('overall time in minutes=', overall_time/60.0)
 print('overall time in hours=', overall_time/3600.0)
 print('overall time=', str(datetime.timedelta(seconds = overall_time)))
+print('start_time=', start_time)
+print('end_time=', end_time)

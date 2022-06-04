@@ -1,3 +1,4 @@
+import shutil
 import time
 import os
 import pandas as pd
@@ -9,6 +10,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import pdfkit
 import imgkit
+import plotly.express as px
 from datetime import datetime
 #from if_asset_is_close_to_hh_or_ll import find_asset_close_to_hh_and_ll
 
@@ -18,7 +20,7 @@ def import_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair='MLN/USDT',
     path_to_usdt_trading_pairs_ohlcv=os.path.join ( os.getcwd () ,
                                          "datasets" ,
                                          "sql_databases" ,
-                                         "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" )
+                                         "multiple_tables_historical_data_for_usdt_trading_pairs_with_mirror_levels_and_kc.db" )
     connection_to_usdt_trading_pairs_ohlcv = \
         sqlite3.connect (  path_to_usdt_trading_pairs_ohlcv)
 
@@ -33,6 +35,20 @@ def import_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair='MLN/USDT',
 def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
     start_time=time.time()
 
+    path_to_usdt_trading_pairs_ohlcv_recent = os.path.join ( os.getcwd () ,
+                                                      "datasets" ,
+                                                      "sql_databases" ,
+                                                      "multiple_tables_historical_data_for_usdt_trading_pairs_with_mirror_levels_with_highs_or_lows_yesterday.db" )
+    connection_to_usdt_trading_pairs_ohlcv_recent = \
+        sqlite3.connect ( path_to_usdt_trading_pairs_ohlcv_recent )
+
+    cursor_recent=connection_to_usdt_trading_pairs_ohlcv_recent.cursor()
+    cursor_recent.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    list_of_ohlcv_with_recent_mirror_highs_and_lows=cursor_recent.fetchall()
+
+    print("list_of_ohlcv_with_recent_mirror_highs_and_lows=\n",
+          list_of_ohlcv_with_recent_mirror_highs_and_lows)
+
     path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
                                                         "sql_databases" ,
                                                         "btc_and_usdt_pairs_from_all_exchanges.db" )
@@ -40,9 +56,23 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
     connection_to_btc_and_usdt_trading_pairs = \
         sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
 
-    mirror_levels_df = pd.read_sql ( f'''select * from mirror_levels ;''' ,
+    mirror_levels_df = pd.read_sql ( f'''select * from mirror_levels_without_duplicates ;''' ,
                                      connection_to_btc_and_usdt_trading_pairs )
-    print ( "mirror_levels_df\n" , mirror_levels_df )
+    #print ( "mirror_levels_df\n" , mirror_levels_df )
+
+    # delete preveiously plotted charts
+    folder_to_be_deleted = os.path.join ( os.getcwd () ,
+                                          'datasets' ,
+                                          'plots' ,
+                                          'crypto_exchange_plots' )
+
+    try:
+        shutil.rmtree ( folder_to_be_deleted )
+        pass
+    except Exception as e:
+        print ( "error deleting folder \n" , e )
+        pass
+
     for row_number in range(0,len(mirror_levels_df)):
         usdt_trading_pair =mirror_levels_df.loc[row_number,'USDT_pair']
         exchange = mirror_levels_df.loc[row_number,'exchange']
@@ -64,13 +94,13 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
         #                                                           '%d-%m-%Y %H:%M:%S' )
         # open_time_of_candle_with_legit_low=datetime.strptime ( open_time_of_candle_with_legit_low ,
         #                                                           '%d-%m-%Y %H:%M:%S' )
-        print (type(open_time_of_candle_with_legit_high))
+        #print (type(open_time_of_candle_with_legit_high))
         historical_data_for_usdt_trading_pair_df=\
             import_ohlcv_and_mirror_levels_for_plotting ( usdt_trading_pair,exchange)
-        print(f'{usdt_trading_pair} on {exchange} is number {row_number} '
+        print(f'{usdt_trading_pair} on {exchange} is number {row_number+1} '
               f'out of {len(mirror_levels_df)}')
         print ( "historical_data_for_usdt_trading_pair_df\n" ,
-                historical_data_for_usdt_trading_pair_df )
+               historical_data_for_usdt_trading_pair_df )
 
         usdt_trading_pair_without_slash=usdt_trading_pair.replace("/","")
 
@@ -88,11 +118,11 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
             pd.DataFrame (columns = ['open_time_of_low','mirror_level'])
         for index, high in enumerate(historical_data_for_usdt_trading_pair_df_list_of_highs):
             if high==mirror_level:
-                print('high of mirror level is found more than one time\n ')
-                print (f'index={index}')
+                #print('high of mirror level is found more than one time\n ')
+                #print (f'index={index}')
                 open_time_of_another_high=\
                     historical_data_for_usdt_trading_pair_df.loc[index,'open_time']
-                print ( f'open_time_of_another_high={open_time_of_another_high}' )
+                #print ( f'open_time_of_another_high={open_time_of_another_high}' )
                 open_time_of_another_high_list.append(open_time_of_another_high)
                 if open_time_of_another_high!=open_time_of_candle_with_legit_high:
                     open_time_of_another_high_list.append ( open_time_of_another_high )
@@ -119,11 +149,11 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
 
         for index, low in enumerate(historical_data_for_usdt_trading_pair_df_list_of_lows):
             if low==mirror_level:
-                print('low of mirror level is found more than one time\n')
-                print ( f'index={index}' )
+                #print('low of mirror level is found more than one time\n')
+                #print ( f'index={index}' )
                 open_time_of_another_low = \
                     historical_data_for_usdt_trading_pair_df.loc[index , 'open_time']
-                print ( f'open_time_of_another_low={open_time_of_another_low}' )
+                #print ( f'open_time_of_another_low={open_time_of_another_low}' )
                 if open_time_of_another_low!=open_time_of_candle_with_legit_low:
                     open_time_of_another_low_list.append ( open_time_of_another_low )
 
@@ -147,23 +177,18 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
             open_time_of_another_low_list_df.at[ index, 'open_time_of_low']=open_time_of_another_low
             open_time_of_another_low_list_df.at[index, 'mirror_level'] = mirror_level
 
-        print("+++++++++++++++++++++++++")
-        print ( "open_time_of_another_high_list_df\n" , open_time_of_another_high_list_df )
+        #print("+++++++++++++++++++++++++")
+        #print ( "open_time_of_another_high_list_df\n" , open_time_of_another_high_list_df )
 
-        print ( "open_time_of_another_low_list_df\n" , open_time_of_another_low_list_df )
+        #print ( "open_time_of_another_low_list_df\n" , open_time_of_another_low_list_df )
         print ( "+++++++++++++++++++++++++" )
-        print ( f'open_time_of_another_low_list={open_time_of_another_low_list}' )
-        print ( f'open_time_of_another_high_list={open_time_of_another_high_list}' )
-        print("-"*80)
+        #print ( f'open_time_of_another_low_list={open_time_of_another_low_list}' )
+        #print ( f'open_time_of_another_high_list={open_time_of_another_high_list}' )
+        #print("-"*80)
         print ( "historical_data_for_usdt_trading_pair_df\n" ,
-                historical_data_for_usdt_trading_pair_df.to_string() )
+                historical_data_for_usdt_trading_pair_df )
 
-
-
-
-
-
-        number_of_charts=1
+        number_of_charts = 1
 
         #plotting charts with mirror levels
         try:
@@ -186,6 +211,12 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                                'crypto_exchange_plots' ,
                                                'crypto_exchange_plots_svg' ,
                                                f'{usdt_trading_pair_without_slash}.svg' )
+            where_to_plot_jpg = os.path.join ( os.getcwd () ,
+                                               'datasets' ,
+                                               'plots' ,
+                                               'crypto_exchange_plots' ,
+                                               'crypto_exchange_plots_jpg' ,
+                                               f'{usdt_trading_pair_without_slash}.jpg' )
 
             where_to_plot_png = os.path.join ( os.getcwd () ,
                                                'datasets' ,
@@ -201,7 +232,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                                'crypto_exchange_plots' )
             Path ( path_to_databases ).mkdir ( parents = True , exist_ok = True )
             #create directories for all hh images
-            formats=['png','svg','pdf','html']
+            formats=['png','svg','pdf','html','jpg']
             for img_format in formats:
                 path_to_special_format_images_of_mirror_charts =\
                     os.path.join ( os.getcwd () ,
@@ -212,10 +243,11 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                 Path ( path_to_special_format_images_of_mirror_charts ).mkdir ( parents = True , exist_ok = True )
 
             fig = make_subplots ( rows = 1 , cols = number_of_charts ,
-                                  shared_xaxes = False , subplot_titles = tuple ( usdt_trading_pair ) ,
+                                  shared_xaxes = False ,
+                                  subplot_titles = tuple ( usdt_trading_pair ) ,
                                   specs = [[{"secondary_y": True}]] )
-            fig.update_layout ( height = 1600 ,
-                                width = 4000 * number_of_charts ,
+            fig.update_layout ( height = 2000 ,
+                                width = 4500 * number_of_charts ,
                                 title_text = f'{usdt_trading_pair} '
                                              f'on {exchange} with mirror level={mirror_level}' ,
                                 font = dict (
@@ -272,6 +304,28 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                 #                 y1 = mirror_level ,
                 #                 line = dict ( color = "purple" , width = 1 ) , row = 1 , col = 1 )
 
+                try:
+                    fig.add_trace(go.Scatter(x = historical_data_for_usdt_trading_pair_df['open_time'] ,
+                                  y = historical_data_for_usdt_trading_pair_df['keltner_mband'] ,
+                                    mode = "lines") ,row = 1 , col = 1)
+                except Exception as e:
+                    print('cannot plot keltner channel', e)
+
+                try:
+                    fig.add_trace(go.Scatter(x = historical_data_for_usdt_trading_pair_df['open_time'] ,
+                                  y = historical_data_for_usdt_trading_pair_df['keltner_hband'] ,
+                                    mode = "lines") ,row = 1 , col = 1)
+                except Exception as e:
+                    print('cannot plot keltner channel', e)
+
+                try:
+                    fig.add_trace(go.Scatter(x = historical_data_for_usdt_trading_pair_df['open_time'] ,
+                                  y = historical_data_for_usdt_trading_pair_df['keltner_lband'] ,
+                                    mode = "lines") ,row = 1 , col = 1)
+                except Exception as e:
+                    print('cannot plot keltner channel', e)
+
+
                 fig.add_hline ( y = mirror_level )
 
                 # fig.add_scatter ( x = open_time_of_candle_with_legit_high ,
@@ -299,9 +353,18 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
 
                 # convert html to svg
                 imgkit.from_file ( where_to_plot_html , where_to_plot_svg )
+                # convert html to png
+
+                # imgkit.from_file ( where_to_plot_html ,
+                #                    where_to_plot_png ,
+                #                    options = {'format': 'png'} )
+
+                # convert html to jpg
+
                 imgkit.from_file ( where_to_plot_html ,
-                                   where_to_plot_png ,
-                                   options = {'format': 'png'} )
+                                   where_to_plot_jpg ,
+                                   options = {'format': 'jpeg'} )
+
 
 
             except Exception as e:

@@ -8,6 +8,11 @@ pandas = "*"
 ccxt = "*"
 numpy = "*"
 talib-bin = "*"
+ta = "*"
+tzlocal = "*"
+plotly = "*"
+imgkit = "*"
+pdfkit = "*"
 
 [dev-packages]
 

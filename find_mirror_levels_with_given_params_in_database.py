@@ -5,6 +5,7 @@ import time
 import datetime
 import traceback
 import datetime as dt
+import tzlocal
 def drop_table_from_database(table_name,path_to_database):
     conn=sqlite3.connect(path_to_database)
     cur=conn.cursor()
@@ -34,7 +35,7 @@ def find_mirror_levels_in_database():
     mirror_level_df = pd.DataFrame ( columns = ['USDT_pair' , 'exchange' , 'mirror_level' ,
                                                 'timestamp_for_low' , 'timestamp_for_high' ,
                                                 'low' , 'high' , 'open_time_of_candle_with_legit_low' ,
-                                                'open_time_of_candle_with_legit_high'] )
+                                                'open_time_of_candle_with_legit_high','average_volume'] )
     try:
         drop_table_from_database ( "mirror_levels_calculated_separately" ,
                                    path_to_db_with_USDT_and_btc_pairs )
@@ -48,7 +49,10 @@ def find_mirror_levels_in_database():
 
     print(list_of_tables)
     counter=0
+    discard_pair_by_volume_counter = 0
     this_many_last_days=90
+    calculate_average_volume_for_this_many_days=30
+    volume_limit=100000
     for table_in_db in list_of_tables:
         try:
             counter=counter+1
@@ -61,13 +65,27 @@ def find_mirror_levels_in_database():
             #print ( "data_df\n" , data_df )
             print("---------------------------")
             print(f'{table_in_db} is number {counter} out of {len(list_of_tables)}\n' )
-            print("usdt_ohlcv_df\n",data_df )
+            #print("usdt_ohlcv_df\n",data_df )
             usdt_pair=data_df.loc[0,"trading_pair"]
             exchange=data_df.loc[0,"exchange"]
             #data_df.reset_index()
             data_df.set_index("Timestamp", inplace = True)
+            data_df["volume_by_close"] = data_df["volume"] * data_df["close"]
+
             #calculate mirror levels and insert them into db
             last_several_days_slice_df = data_df.tail ( this_many_last_days )
+            average_volume=last_several_days_slice_df[
+                "volume_by_close"].tail(calculate_average_volume_for_this_many_days).mean()
+            print("average volume=", average_volume)
+
+            #discard pairs with low volume
+            if average_volume<volume_limit:
+                print(f"average volume is less than {volume_limit}"
+                      f" for {usdt_pair} on {exchange}  ")
+                discard_pair_by_volume_counter=discard_pair_by_volume_counter+1
+                print("discard_pair_by_volume_counter=",
+                      discard_pair_by_volume_counter)
+                continue
             #last_several_days_slice_df.set_index('open_time')
 
             if last_several_days_slice_df.duplicated ( subset = 'high' ,
@@ -76,7 +94,7 @@ def find_mirror_levels_in_database():
                 continue
             # print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
             #
-            print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
+            #print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
             last_several_days_highs_slice_Series = \
                 last_several_days_slice_df['high'].squeeze ()
             last_several_days_lows_slice_Series = \
@@ -107,8 +125,8 @@ def find_mirror_levels_in_database():
                                     row_number_in_lows - 2]
                                 next_daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows]
 
-                                print("last_several_days_lows_slice_Series.iloc[row_number_in_lows]=\n",
-                                      last_several_days_lows_slice_Series.iloc[row_number_in_lows])
+                                #print("last_several_days_lows_slice_Series.iloc[row_number_in_lows]=\n",
+                                #      last_several_days_lows_slice_Series.iloc[row_number_in_lows])
 
                                 # print ( "prev_daily_high\n" , prev_daily_high )
                                 # print ( "next_daily_high\n" , next_daily_high )
@@ -122,21 +140,21 @@ def find_mirror_levels_in_database():
                                     if prev_daily_low > daily_low and next_daily_low > daily_low:
                                         print ( "level is legit\n" )
 
-                                        print ( "last_several_days_lows_slice_Series\n" ,
-                                                last_several_days_lows_slice_Series )
+                                        #print ( "last_several_days_lows_slice_Series\n" ,
+                                        #        last_several_days_lows_slice_Series )
 
                                         list_of_tuples_of_lows = list ( last_several_days_lows_slice_Series.items () )
-                                        print ( "list_of_tuples_of_lows\n",list_of_tuples_of_lows )
+                                        #print ( "list_of_tuples_of_lows\n",list_of_tuples_of_lows )
                                         tuple_of_legit_low_level = list_of_tuples_of_lows[row_number_in_lows - 1]
-                                        print ( "tuple_of_legit_low_level\n" ,
-                                                tuple_of_legit_low_level )
+                                        #print ( "tuple_of_legit_low_level\n" ,
+                                        #        tuple_of_legit_low_level )
 
                                         list_of_tuples_of_highs = list (
                                             last_several_days_highs_slice_Series.items () )
-                                        print ( "list_of_tuples_of_highs\n" , list_of_tuples_of_highs )
+                                        #print ( "list_of_tuples_of_highs\n" , list_of_tuples_of_highs )
                                         tuple_of_legit_high_level = list_of_tuples_of_highs[
                                             row_number_in_highs - 1]
-                                        print ("tuple_of_legit_high_level\n", tuple_of_legit_high_level)
+                                        #print ("tuple_of_legit_high_level\n", tuple_of_legit_high_level)
 
                                         # print ( "dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] )\n" ,
                                         #         dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] / 1000.0 ) )
@@ -157,8 +175,11 @@ def find_mirror_levels_in_database():
                                             dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] / 1000.0 )
                                         mirror_level_df.loc[0 , 'open_time_of_candle_with_legit_high'] = \
                                             dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0] / 1000.0 )
+                                        mirror_level_df.loc[0 , 'average_volume'] = average_volume
 
                                         print ( 'mirror_level_df\n' , mirror_level_df )
+
+
 
                                         mirror_level_df.to_sql ( "mirror_levels_calculated_separately" ,
                                                                  connection_to_btc_and_usdt_trading_pairs ,
@@ -176,5 +197,28 @@ def find_mirror_levels_in_database():
     print ( 'overall time in minutes=' , overall_time / 60.0 )
     print ( 'overall time in hours=' , overall_time / 3600.0 )
     print ( 'overall time=' , str ( datetime.timedelta ( seconds = overall_time ) ) )
+    print ( 'start_time=' , start_time )
+    print ( 'end_time=' , end_time )
 
 find_mirror_levels_in_database()
+#
+# def drop_duplicates_in_db():
+#     path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
+#                                                         "sql_databases" ,
+#                                                         "btc_and_usdt_pairs_from_all_exchanges.db" )
+#
+#     connection_to_btc_and_usdt_trading_pairs = \
+#         sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
+#     mirror_levels_df=pd.read_sql_query("mirror_levels_calculated_separately",
+#                                        connection_to_btc_and_usdt_trading_pairs)
+#     print("number of trading pairs with duplicates=",
+#           len(mirror_levels_df))
+#     mirror_levels_df.drop_duplicates(subset = ["USDT_pair","mirror_level"],
+#                                      keep = "first",
+#                                      inplace = True)
+#     mirror_levels_df.to_sql("mirror_levels_without_duplicates",
+#                             connection_to_btc_and_usdt_trading_pairs)
+#     print ( "number of trading pairs without duplicates=" ,
+#             len ( mirror_levels_df ) )
+#     pass
+# drop_duplicates_in_db()
