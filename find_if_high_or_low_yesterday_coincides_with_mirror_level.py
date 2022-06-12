@@ -8,6 +8,7 @@ import traceback
 import datetime as dt
 import shutil
 from ta.volatility import KeltnerChannel
+from drop_table_from_database import drop_table_from_database
 
 def create_empty_database(path_to_db):
     '''create empty salite db for a given path'''
@@ -128,6 +129,15 @@ def find_mirror_levels_in_database():
                                                                  "sql_databases" ,
                                                                  "multiple_tables_historical_data_for_usdt_trading_pairs_with_mirror_levels_with_highs_or_lows_yesterday.db" )
 
+    # path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
+    #                                                     "sql_databases" ,
+    #                                                     "btc_and_usdt_pairs_from_all_exchanges.db" )
+    #
+    # connection_to_btc_and_usdt_trading_pairs = \
+    #     sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
+    drop_table_from_database("usdt_pair_names_and_exchanges_where_recent_low_or_high_is_equal_to_mirror_level",
+                             path_to_db_with_USDT_and_btc_pairs)
+
     #shutil.rmtree ( path_to_ohlcv_db_with_yesterday_high_or_low )
     if os.path.exists(path_to_ohlcv_db_with_yesterday_high_or_low):
         os.remove ( path_to_ohlcv_db_with_yesterday_high_or_low )
@@ -148,6 +158,7 @@ def find_mirror_levels_in_database():
                                 connection_to_btc_and_usdt_trading_pairs )
         print("mirror_df\n",mirror_df.to_string())
         list_or_tables_with_recent_highs_and_lows_which_coincide_with_mirror_level=[]
+        usdt_pair_row_conter=0
         for row in range(0,len(mirror_df)):
             joint_string_for_table_name=mirror_df.loc[row,"USDT_pair"]+'_on_'+mirror_df.loc[row,"exchange"]
             mirror_level=mirror_df.loc(axis=0)[row,"mirror_level"]
@@ -157,7 +168,7 @@ def find_mirror_levels_in_database():
             print ( "mirror_df_row_slice=\n" , mirror_df_row_slice.to_string()  )
             usdt_pair=mirror_df.loc[row , "USDT_pair"]
             exchange=mirror_df.loc[row , "exchange"]
-
+            usdt_pair_name_and_exchange_df=pd.DataFrame()
 
 
             print("row=",row)
@@ -178,6 +189,31 @@ def find_mirror_levels_in_database():
                                                                         row)
             if usdt_pair_recent==None:
                 continue
+            usdt_pair_row_conter=usdt_pair_row_conter+1
+            print ( "usdt_pair_recent\n" , usdt_pair_recent )
+            #time.sleep ( 1000 )
+
+            last_date_with_time = data_df["open_time"].iloc[-1]
+            print ( "type(last_date_with_time)\n" , type ( last_date_with_time ) )
+            print ( "last_date_with_time\n" , last_date_with_time )
+            last_date_without_time = last_date_with_time.split ( " " )
+            print ( "last_date_with_time\n" , last_date_without_time[0] )
+            last_date_without_time = last_date_without_time[0]
+
+
+            #add names of usdt pairs and exchanges to a data base
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter-1,"usdt_pair"]=usdt_pair_recent
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter-1,"exchange_recent"] = exchange_recent
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter - 1 , "next_date_after_low_or_high_coincided_with_mirror_level"] = last_date_without_time
+            print("usdt_pair_name_and_exchange_df\n",usdt_pair_name_and_exchange_df)
+            #time.sleep(1000)
+            usdt_pair_name_and_exchange_df.to_sql ( '''usdt_pair_names_and_exchanges_where_recent_low_or_high_is_equal_to_mirror_level''' ,
+                             connection_to_btc_and_usdt_trading_pairs ,
+                             if_exists = "append" )
+
+
+
+
             recent_string_for_table=f"{usdt_pair_recent}_on_{exchange_recent}"
             list_or_tables_with_recent_highs_and_lows_which_coincide_with_mirror_level.append(recent_string_for_table)
 
@@ -238,4 +274,5 @@ def find_mirror_levels_in_database():
     print ( 'local_time_start=' , local_time_start )
     print ( 'local_time_end=' , local_time_end )
 
-find_mirror_levels_in_database()
+if __name__=="__main__":
+    find_mirror_levels_in_database()

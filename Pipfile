@@ -13,6 +13,8 @@ tzlocal = "*"
 plotly = "*"
 imgkit = "*"
 pdfkit = "*"
+aiohttp = "*"
+aiofiles = "*"
 
 [dev-packages]
 

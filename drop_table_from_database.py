@@ -17,5 +17,5 @@ def drop_table_from_database(table_name,path_to_database):
 table_name='stocks'
 path_to_database=os.path.join(os.getcwd(),'datasets','sql_databases','tickers_companies_prices.db')
 print(path_to_database)
-
-drop_table_from_database(table_name,path_to_database)
+if __name__=="__main__":
+    drop_table_from_database(table_name,path_to_database)

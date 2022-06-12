@@ -51,7 +51,7 @@ def create_empty_database(path_to_db):
 create_empty_database(path_to_db)
 
 
-def get_USDT_and_BTC_trading_pairs_from_one_exchange(exchange_name='binance'):
+def get_USDT_and_BTC_trading_pairs_from_one_exchange(exchange_name):
 
     exchange_object=getattr(ccxt,exchange_name)()
     #print(type(ccxt.binance()))
@@ -183,7 +183,8 @@ def get_USDT_and_BTC_trading_pairs_from_all_exchanges():
     #time.sleep(30000)
     return list_of_all_btc_pairs_from_all_exchanges_without_duplicates
 
-get_USDT_and_BTC_trading_pairs_from_all_exchanges()
+if __name__=="__main__":
+    get_USDT_and_BTC_trading_pairs_from_all_exchanges()
 
 def insert_USDT_and_BTC_trading_pairs_from_all_exchanges_into_db(
         list_of_all_btc_pairs_from_all_exchanges_without_duplicates,
@@ -212,9 +213,11 @@ def insert_USDT_and_BTC_trading_pairs_from_all_exchanges_into_db(
                                                                        if_exists = 'replace' )
     connection_to_btc_and_usdt_trading_pairs.close()
     pass
-insert_USDT_and_BTC_trading_pairs_from_all_exchanges_into_db(
-        list_of_all_btc_pairs_from_all_exchanges_without_duplicates,
-        list_of_all_usdt_pairs_from_all_exchanges_without_duplicates)
+
+if __name__=="__main__":
+    insert_USDT_and_BTC_trading_pairs_from_all_exchanges_into_db(
+            list_of_all_btc_pairs_from_all_exchanges_without_duplicates,
+            list_of_all_usdt_pairs_from_all_exchanges_without_duplicates)
 
 
 path_to_db=os.path.join(os.getcwd(),"datasets",
@@ -243,6 +246,8 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
     # global flattened_list_of_all_usdt_pairs_from_all_exchanges
     header = ['Timestamp' , 'open' , 'high' , 'low' , 'close' , 'volume']
     list_of_all_exchanges = get_list_of_all_exchanges ()
+    print("list_of_all_exchanges\n",list_of_all_exchanges)
+    #time.sleep(10000)
     list_of_all_btc_pairs_from_all_exchanges = []
     list_of_all_usdt_pairs_from_all_exchanges = []
     dict_of_all_usdt_pairs_with_mirror_levels_from_all_exchanges = {}
@@ -263,10 +268,10 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
     connection_to_btc_and_usdt_trading_pairs = \
         sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
 
-    mirror_level_df=pd.DataFrame(columns = ['USDT_pair', 'exchange', 'mirror_level',
-                                             'timestamp_for_low','timestamp_for_high',
-                                             'low','high','open_time_of_candle_with_legit_low',
-                                            'open_time_of_candle_with_legit_high'])
+    # mirror_level_df=pd.DataFrame(columns = ['USDT_pair', 'exchange', 'mirror_level',
+    #                                          'timestamp_for_low','timestamp_for_high',
+    #                                          'low','high','open_time_of_candle_with_legit_low',
+    #                                         'open_time_of_candle_with_legit_high'])
     try:
         drop_table_from_database("mirror_levels",path_to_db_with_USDT_and_btc_pairs)
     except:
@@ -280,7 +285,7 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
             print ( exchange )
             print("len(list_of_all_exchanges)=",len(list_of_all_exchanges))
 
-            #print ( "\nbtc_pairs_list=\n" , btc_pairs_list )
+            print ( "\nusd_pairs_list=\n" , usd_pairs_list )
             exchange_object = getattr ( ccxt , exchange ) ()
             exchange_object.load_markets ()
             exchange_object.enableRateLimit = True
@@ -337,11 +342,12 @@ def get_BTC_and_USDT_pair_ohlcv_from_exchanges(list_of_all_btc_pairs_from_all_ex
     connection_to_usdt_trading_pairs_ohlcv.close()
     connection_to_btc_and_usdt_trading_pairs.close ()
 
-get_BTC_and_USDT_pair_ohlcv_from_exchanges(
-    list_of_all_btc_pairs_from_all_exchanges_without_duplicates,
-    dict_of_all_btc_pairs_from_all_exchanges_without_duplicates,
-    flattened_list_of_all_btc_pairs_from_all_exchanges,
-    flattened_list_of_all_usdt_pairs_from_all_exchanges)
+if __name__=="__main__":
+    get_BTC_and_USDT_pair_ohlcv_from_exchanges(
+        list_of_all_btc_pairs_from_all_exchanges_without_duplicates,
+        dict_of_all_btc_pairs_from_all_exchanges_without_duplicates,
+        flattened_list_of_all_btc_pairs_from_all_exchanges,
+        flattened_list_of_all_usdt_pairs_from_all_exchanges)
 
 end_time=time.time()
 overall_time=end_time-start_time

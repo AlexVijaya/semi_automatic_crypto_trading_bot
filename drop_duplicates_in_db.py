@@ -23,7 +23,7 @@ def drop_duplicates_in_db():
                                      inplace = True)
     # create additional boolian coulumn
     # which says if there are multiple mirror levels in this pair
-    mirror_levels_df["pair_with_multiple_mirror_levels_on_one_exchange","exchange"]=\
+    mirror_levels_df["pair_with_multiple_mirror_levels_on_one_exchange"]=\
         mirror_levels_df.duplicated(subset=["USDT_pair","exchange"],keep=False)
 
     mirror_levels_df.reset_index(inplace = True,drop = True)
@@ -63,4 +63,5 @@ def drop_duplicates_in_db():
     print ( 'local_time_start=' , local_time_start )
     print ( 'local_time_end=' , local_time_end )
     pass
-drop_duplicates_in_db()
+if __name__=="__main__":
+    drop_duplicates_in_db()

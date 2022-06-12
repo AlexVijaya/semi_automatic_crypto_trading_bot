@@ -20,6 +20,15 @@ def find_mirror_levels_in_database():
                                          "datasets" ,
                                          "sql_databases" ,
                                          "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+
+    async_var = True
+    if async_var==True:
+        connection_to_usdt_trading_pairs_ohlcv = \
+            sqlite3.connect ( os.path.join ( os.getcwd () ,
+                                             "datasets" ,
+                                             "sql_databases" ,
+                                             "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+
     cursor=connection_to_usdt_trading_pairs_ohlcv.cursor()
     cursor.execute ( "SELECT name FROM sqlite_master WHERE type='table';" )
 
@@ -199,8 +208,12 @@ def find_mirror_levels_in_database():
     print ( 'overall time=' , str ( datetime.timedelta ( seconds = overall_time ) ) )
     print ( 'start_time=' , start_time )
     print ( 'end_time=' , end_time )
+if __name__=="__main__":
 
-find_mirror_levels_in_database()
+    find_mirror_levels_in_database()
+
+#print("__name__",__name__)
+# find_mirror_levels_in_database ()
 #
 # def drop_duplicates_in_db():
 #     path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,

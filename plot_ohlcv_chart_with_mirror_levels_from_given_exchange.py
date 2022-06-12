@@ -197,7 +197,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                            'plots' ,
                                            'crypto_exchange_plots' ,
                                            'crypto_exchange_plots_html',
-                                           f'{usdt_trading_pair_without_slash}.html')
+                                           f'{usdt_trading_pair_without_slash}_on_{exchange}.html')
 
             where_to_plot_pdf = os.path.join ( os.getcwd () ,
                                                'datasets' ,
@@ -210,20 +210,20 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                                'plots' ,
                                                'crypto_exchange_plots' ,
                                                'crypto_exchange_plots_svg' ,
-                                               f'{usdt_trading_pair_without_slash}.svg' )
+                                               f'{usdt_trading_pair_without_slash}_on_{exchange}.svg' )
             where_to_plot_jpg = os.path.join ( os.getcwd () ,
                                                'datasets' ,
                                                'plots' ,
                                                'crypto_exchange_plots' ,
                                                'crypto_exchange_plots_jpg' ,
-                                               f'{usdt_trading_pair_without_slash}.jpg' )
+                                               f'{usdt_trading_pair_without_slash}_on_{exchange}.jpg' )
 
             where_to_plot_png = os.path.join ( os.getcwd () ,
                                                'datasets' ,
                                                'plots' ,
                                                'crypto_exchange_plots' ,
                                                'crypto_exchange_plots_png' ,
-                                               f'{usdt_trading_pair_without_slash}.png' )
+                                               f'{usdt_trading_pair_without_slash}_on_{exchange}.png' )
             #create directory for crypto_exchange_plots parent folder
             # if it does not exists
             path_to_databases = os.path.join ( os.getcwd () ,
