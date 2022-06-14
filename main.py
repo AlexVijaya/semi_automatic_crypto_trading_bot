@@ -9,13 +9,16 @@ import find_mirror_levels_with_given_params_in_database
 import drop_duplicates_in_db
 import find_if_high_or_low_yesterday_coincides_with_mirror_level
 import plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows
+#import second_fetch_historical_USDT_pairs_ohlc_from_all_exchanges_with_ccxt
 def main():
     start_time=time.time()
+    async_var=True
     async_fetch_historical_USDT_pairs_from_all_exchanges_with_ccxt.fetch_historical_usdt_pairs_asynchronously()
-    find_mirror_levels_with_given_params_in_database.find_mirror_levels_in_database()
+    # if async_var==False:
+    #     second_fetch_historical_USDT_pairs_ohlc_from_all_exchanges_with_ccxt.find_mirror_levels_with_given_params_in_database.find_mirror_levels_in_database(async_var)
     drop_duplicates_in_db.drop_duplicates_in_db()
-    find_if_high_or_low_yesterday_coincides_with_mirror_level.find_if_high_or_low_yesterday_coincides_with_mirror_level()
-    plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange()
+    find_if_high_or_low_yesterday_coincides_with_mirror_level.find_mirror_levels_in_database(async_var)
+    plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange(async_var)
 
     end_time = time.time ()
     overall_time = end_time - start_time

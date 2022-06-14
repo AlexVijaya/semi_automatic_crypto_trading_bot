@@ -23,7 +23,8 @@ def import_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair,
                                          "multiple_tables_historical_data_for_usdt_trading_pairs_with_mirror_levels_with_highs_or_lows_yesterday.db" )
     connection_to_usdt_trading_pairs_ohlcv = \
         sqlite3.connect (  path_to_usdt_trading_pairs_ohlcv)
-
+    print("usdt_trading_pair_for_debug=",usdt_trading_pair)
+    #time.sleep(4)
     historical_data_for_usdt_trading_pair_df=\
         pd.read_sql ( f'''select * from "{usdt_trading_pair}_on_{exchange}" ;'''  ,
                              connection_to_usdt_trading_pairs_ohlcv )
@@ -32,7 +33,7 @@ def import_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair,
 
 
 
-def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
+def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
     start_time=time.time()
     counter=0
 
@@ -42,6 +43,14 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                                       "multiple_tables_historical_data_for_usdt_trading_pairs_with_mirror_levels_with_highs_or_lows_yesterday.db" )
     connection_to_usdt_trading_pairs_ohlcv_recent = \
         sqlite3.connect ( path_to_usdt_trading_pairs_ohlcv_recent )
+
+    #async_var = True
+    # if async_var == True:
+    #     connection_to_usdt_trading_pairs_ohlcv_recent = \
+    #         sqlite3.connect ( os.path.join ( os.getcwd () ,
+    #                                          "datasets" ,
+    #                                          "sql_databases" ,
+    #                                          "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
 
     cursor_recent=connection_to_usdt_trading_pairs_ohlcv_recent.cursor()
     cursor_recent.execute("SELECT name FROM sqlite_master WHERE type='table';")
@@ -429,4 +438,5 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
 
 
 if __name__=="__main__":
-    plot_ohlcv_chart_with_mirror_levels_from_given_exchange ()
+    async_var=False
+    plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var)

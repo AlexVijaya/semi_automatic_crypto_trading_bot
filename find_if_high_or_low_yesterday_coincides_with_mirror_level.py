@@ -98,7 +98,7 @@ def find_if_high_or_low_yesterday_coincides_with_mirror_level(data_df,
         #time.sleep ( 10 )
     #
 
-def find_mirror_levels_in_database():
+def find_mirror_levels_in_database(async_var):
     start_time = time.time ()
     connection_to_usdt_trading_pairs_ohlcv = \
         sqlite3.connect ( os.path.join ( os.getcwd () ,
@@ -151,6 +151,14 @@ def find_mirror_levels_in_database():
                                          "datasets" ,
                                          "sql_databases" ,
                                          "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+
+    #async_var = True
+    if async_var == True:
+        connection_to_usdt_trading_pairs_ohlcv = \
+            sqlite3.connect ( os.path.join ( os.getcwd () ,
+                                             "datasets" ,
+                                             "sql_databases" ,
+                                             "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
 
     try:
         mirror_df = \
@@ -275,4 +283,5 @@ def find_mirror_levels_in_database():
     print ( 'local_time_end=' , local_time_end )
 
 if __name__=="__main__":
-    find_mirror_levels_in_database()
+    async_var=False
+    find_mirror_levels_in_database(async_var)
