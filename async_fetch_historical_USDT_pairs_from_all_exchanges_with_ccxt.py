@@ -106,12 +106,22 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,counter,con
 
 
                     #print ( "data=" , data )
+            except ccxt.base.errors.RequestTimeout:
+                print("found ccxt.base.errors.RequestTimeout error inner")
+                pass
+
             except Exception as e:
                 print(f"problem with {trading_pair} on {exchange}\n", e)
                 traceback.print_exc ()
                 continue
         await exchange_object.close ()
         # connection_to_usdt_trading_pairs_ohlcv.close()
+
+    except ccxt.base.errors.RequestTimeout:
+        print ( "found ccxt.base.errors.RequestTimeout error outer" )
+        traceback.print_exc ()
+        pass
+
     except Exception as e:
         print(f"problem with {exchange}\n", e)
         traceback.print_exc()

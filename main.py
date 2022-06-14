@@ -22,11 +22,13 @@ def main():
 
     end_time = time.time ()
     overall_time = end_time - start_time
-    print ( 'overall time in minutes=' , overall_time / 60.0 )
-    print ( 'overall time in hours=' , overall_time / 3600.0 )
-    print ( 'overall time=' , str ( datetime.timedelta ( seconds = overall_time ) ) )
-    print ( 'start_time=' , start_time )
-    print ( 'end_time=' , end_time )
+    print ( 'overall time of the main program in minutes=' , overall_time / 60.0 )
+    print ( 'overall time of the main program in hours=' , overall_time / 3600.0 )
+    print ( 'overall time of the main program=' , str ( datetime.timedelta ( seconds = overall_time ) ) )
+    print ( 'start_time of the main program=' ,
+            datetime.datetime.utcfromtimestamp ( start_time ).strftime ( '%Y-%m-%dT%H:%M:%SZ' ))
+    print ( 'end_time of the main program=' ,
+            datetime.datetime.utcfromtimestamp ( end_time ).strftime ( '%Y-%m-%dT%H:%M:%SZ' ))
 
 # Press the green button in the gutter to run the script.
 if __name__ == '__main__':
