@@ -27,6 +27,7 @@ def drop_duplicates_in_db():
         mirror_levels_df.duplicated(subset=["USDT_pair","exchange"],keep=False)
 
     mirror_levels_df.reset_index(inplace = True,drop = True)
+    print("len(mirror_levels_df.index)=",len(mirror_levels_df.index))
 
     #drop pairs which begin with usd
     for row in range(0,len(mirror_levels_df.index)):

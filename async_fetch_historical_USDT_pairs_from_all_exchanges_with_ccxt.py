@@ -154,11 +154,17 @@ def fetch_historical_usdt_pairs_asynchronously():
     #                 'zipmex', 'zonda']
     exchanges_list=ccxt.exchanges
 
-    connection_to_usdt_trading_pairs_ohlcv = \
+    connection_to_usdt_trading_pairs_daily_ohlcv = \
         sqlite3.connect ( os.path.join ( os.getcwd () ,
                                          "datasets" ,
                                          "sql_databases" ,
                                          "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+
+    connection_to_usdt_trading_pairs_4h_ohlcv = \
+        sqlite3.connect ( os.path.join ( os.getcwd () ,
+                                         "datasets" ,
+                                         "sql_databases" ,
+                                         "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs_4h.db" ) )
 
     # coroutines = [await get_hisorical_data_from_exchange_for_many_symbols(exchange ) for exchange in  exchanges_list]
     # await asyncio.gather(*coroutines, return_exceptions = True)
@@ -169,11 +175,12 @@ def fetch_historical_usdt_pairs_asynchronously():
     loop=asyncio.get_event_loop()
     tasks=[loop.create_task(get_hisorical_data_from_exchange_for_many_symbols(exchange,
                                                                               counter,
-                                                                              connection_to_usdt_trading_pairs_ohlcv)) for exchange in  exchanges_list]
+                                                                              connection_to_usdt_trading_pairs_daily_ohlcv)) for exchange in  exchanges_list]
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
-    connection_to_usdt_trading_pairs_ohlcv.close()
+    connection_to_usdt_trading_pairs_daily_ohlcv.close()
+    connection_to_usdt_trading_pairs_4h_ohlcv.close ()
     end = time.perf_counter ()
     print("time in seconds is ", end-start)
     print ( "time in minutes is " , (end - start)/60.0 )

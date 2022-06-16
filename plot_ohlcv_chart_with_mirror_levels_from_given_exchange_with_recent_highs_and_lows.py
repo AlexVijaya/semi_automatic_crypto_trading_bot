@@ -113,19 +113,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
             open_time_of_candle_with_legit_high = mirror_levels_df.loc[row_number ,
                                                 'open_time_of_candle_with_legit_high']
 
-            # open_time_of_candle_with_legit_high = datetime.strptime ( open_time_of_candle_with_legit_high_str ,
-            #                                                           '%Y-%m-%d %H:%M:%S' )
-            # open_time_of_candle_with_legit_low = datetime.strptime ( open_time_of_candle_with_legit_low_str ,
-            #                                                           '%Y-%m-%d %H:%M:%S' )
 
-            # open_time_of_candle_with_legit_high=open_time_of_candle_with_legit_high.strftime("%d-%m-%Y %H:%M:%S")
-            # open_time_of_candle_with_legit_low = open_time_of_candle_with_legit_low.strftime ( "%d-%m-%Y %H:%M:%S" )
-
-            # open_time_of_candle_with_legit_high=datetime.strptime ( open_time_of_candle_with_legit_high ,
-            #                                                           '%d-%m-%Y %H:%M:%S' )
-            # open_time_of_candle_with_legit_low=datetime.strptime ( open_time_of_candle_with_legit_low ,
-            #                                                           '%d-%m-%Y %H:%M:%S' )
-            #print (type(open_time_of_candle_with_legit_high))
             historical_data_for_usdt_trading_pair_df=\
                 import_ohlcv_and_mirror_levels_for_plotting ( usdt_trading_pair,exchange)
             print(f'{usdt_trading_pair} on {exchange} is number {row_number+1} '

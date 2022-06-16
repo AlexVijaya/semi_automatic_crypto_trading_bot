@@ -15,11 +15,16 @@ def drop_table_from_database(table_name,path_to_database):
 
 def find_mirror_levels_in_database(async_var):
     start_time = time.time ()
+
+
+
     connection_to_usdt_trading_pairs_ohlcv = \
         sqlite3.connect ( os.path.join ( os.getcwd () ,
                                          "datasets" ,
                                          "sql_databases" ,
                                          "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+
+
 
     #async_var = True
     if async_var==True:
@@ -209,7 +214,7 @@ def find_mirror_levels_in_database(async_var):
     print ( 'start_time=' , start_time )
     print ( 'end_time=' , end_time )
 if __name__=="__main__":
-    async_var=False
+    async_var=True
     find_mirror_levels_in_database(async_var)
 
 #print("__name__",__name__)
