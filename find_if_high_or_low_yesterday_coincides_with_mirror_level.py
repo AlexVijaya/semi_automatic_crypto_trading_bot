@@ -190,7 +190,8 @@ def find_mirror_levels_in_database(async_var):
             # exchange_recent=None
             #data_df.loc[-1,"low"]=mirror_level
 
-            usdt_pair_recent, exchange_recent=find_if_high_or_low_yesterday_coincides_with_mirror_level ( data_df ,
+            usdt_pair_recent, exchange_recent=\
+                find_if_high_or_low_yesterday_coincides_with_mirror_level ( data_df ,
                                                                         mirror_df_row_slice ,
                                                                         usdt_pair ,
                                                                         exchange,

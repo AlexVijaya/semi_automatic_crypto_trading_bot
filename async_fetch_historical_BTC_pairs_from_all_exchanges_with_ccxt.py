@@ -30,26 +30,22 @@ import ccxt.async_support as ccxt  # noqa: E402
 #         yield n
 new_counter=0
 not_active_pair_counter = 0
-list_of_inactive_pairs=[]
 
 async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                                                             counter,
-                                                            connection_to_usdt_trading_pairs_ohlcv):
+                                                            connection_to_btc_trading_pairs_ohlcv):
     print("exchange=",exchange)
     global new_counter
-    global list_of_inactive_pairs
+
     global not_active_pair_counter
-
-    exchange_object = getattr ( ccxt , exchange ) ()
-    exchange_object.enableRateLimit = True
-
-
     try:
-        # connection_to_usdt_trading_pairs_ohlcv = \
+        exchange_object = getattr ( ccxt , exchange ) ()
+        exchange_object.enableRateLimit = True
+        # connection_to_btc_trading_pairs_ohlcv = \
         #     sqlite3.connect ( os.path.join ( os.getcwd () ,
         #                                      "datasets" ,
         #                                      "sql_databases" ,
-        #                                      "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+        #                                      "all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs.db" ) )
 
         await exchange_object.load_markets ()
         list_of_all_symbols_from_exchange=exchange_object.symbols
@@ -66,15 +62,27 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
 
             try:
                 print ( "exchange=" , exchange )
-                print ( "usdt_pair=" , trading_pair )
+                print ( "btc_pair=" , trading_pair )
                 if "UP/" in trading_pair or "DOWN/" in trading_pair or "BEAR/" in trading_pair or "BULL/" in trading_pair:
                     continue
                 if "/USDT" in trading_pair:
-                    new_counter = new_counter + 1
-                    print("new_counter=",new_counter)
+
                     list_of_trading_pairs_with_USDT.append(trading_pair)
                     # print ( f"list_of_trading_pairs_with_USDT_on_{exchange}\n" ,
                     #         list_of_trading_pairs_with_USDT )
+
+
+
+                elif "/USD" in trading_pair and "/USDT" not in trading_pair:
+                    #print(trading_pair)
+                    list_of_trading_pairs_with_USD.append(trading_pair)
+
+                elif "/BTC" in trading_pair:
+                    #print(trading_pair)
+                    new_counter = new_counter + 1
+                    print ( "new_counter=" , new_counter )
+                    list_of_trading_pairs_with_BTC.append(trading_pair)
+
                     data = await exchange_object.fetch_ohlcv ( trading_pair , '1d' )
 
                     print ( f"counter_for_{exchange}=" , counter )
@@ -98,7 +106,7 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                     #     print ( "data_df_4h\n" , data_df_4h )
                     #
                     #     data_df_4h.to_sql ( f"{trading_pair}_on_{exchange}" ,
-                    #                      connection_to_usdt_trading_pairs_4h_ohlcv ,
+                    #                      connection_to_btc_trading_pairs_4h_ohlcv ,
                     #                      if_exists = 'replace' )
                     #
                     #
@@ -110,18 +118,17 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                     print ( data_df )
                     data_df['trading_pair'] = trading_pair
                     data_df['exchange'] = exchange
-                    current_timestamp=time.time()
-                    last_timestamp_in_df=data_df.tail(1).index.item()/1000.0
-                    print("current_timestamp=",current_timestamp)
-                    print("data_df.tail(1).index.item()=",data_df.tail(1).index.item()/1000.0)
+                    current_timestamp = time.time ()
+                    last_timestamp_in_df = data_df.tail ( 1 ).index.item () / 1000.0
+                    print ( "current_timestamp=" , current_timestamp )
+                    print ( "data_df.tail(1).index.item()=" , data_df.tail ( 1 ).index.item () / 1000.0 )
 
-                    #check if the pair is active
-                    if not abs(current_timestamp-last_timestamp_in_df)<(86400):
-                        print(f"not quite active trading pair {trading_pair} on {exchange}")
-                        not_active_pair_counter=not_active_pair_counter+1
-                        print("not_active_pair_counter=",not_active_pair_counter)
-                        list_of_inactive_pairs.append(f"{trading_pair}_on_{exchange}")
-                        #continue
+                    # check if the pair is active
+                    # if not (current_timestamp - last_timestamp_in_df) < (86400):
+                    #     print ( f"not quite active trading pair {trading_pair} on {exchange}" )
+                    #     not_active_pair_counter = not_active_pair_counter + 1
+                    #     print ( "not_active_pair_counter=" , not_active_pair_counter )
+                    #     continue
 
                     data_df['open_time'] = \
                         [dt.datetime.fromtimestamp ( x / 1000.0 ) for x in data_df.index]
@@ -135,18 +142,11 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                     print ( "data_df\n" , data_df )
 
                     data_df.to_sql ( f"{trading_pair}_on_{exchange}" ,
-                                     connection_to_usdt_trading_pairs_ohlcv ,
+                                     connection_to_btc_trading_pairs_ohlcv ,
                                      if_exists = 'replace' )
 
 
 
-                elif "/USD" in trading_pair and "/USDT" not in trading_pair:
-                    #print(trading_pair)
-                    list_of_trading_pairs_with_USD.append(trading_pair)
-
-                elif "/BTC" in trading_pair:
-                    #print(trading_pair)
-                    list_of_trading_pairs_with_BTC.append(trading_pair)
                 else:
                     continue
 
@@ -172,7 +172,7 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                 await exchange_object.close ()
                 continue
         await exchange_object.close ()
-        # connection_to_usdt_trading_pairs_ohlcv.close()
+        # connection_to_btc_trading_pairs_ohlcv.close()
 
     except ccxt.base.errors.RequestTimeout:
         print ( "found ccxt.base.errors.RequestTimeout error outer" )
@@ -188,12 +188,11 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
 
         #await exchange_object.close ()
 
-    finally:
-        await exchange_object.close ()
-        print("exchange object is closed")
+    # finally:
+    #     await exchange_object.close ()
 
 
-def fetch_historical_usdt_pairs_asynchronously():
+def fetch_historical_btc_pairs_asynchronously():
     start=time.perf_counter()
     # exchanges_list=['aax', 'ascendex', 'bequant', 'bibox', 'bigone',
     #                 'binance', 'binancecoinm', 'binanceus', 'binanceusdm',
@@ -219,41 +218,40 @@ def fetch_historical_usdt_pairs_asynchronously():
     #                 'zipmex', 'zonda']
     exchanges_list=ccxt.exchanges
 
-    connection_to_usdt_trading_pairs_daily_ohlcv = \
+    connection_to_btc_trading_pairs_daily_ohlcv = \
         sqlite3.connect ( os.path.join ( os.getcwd () ,
                                          "datasets" ,
                                          "sql_databases" ,
-                                         "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+                                         "async_all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs.db" ) )
 
-    # connection_to_usdt_trading_pairs_4h_ohlcv = \
+    # connection_to_btc_trading_pairs_4h_ohlcv = \
     #     sqlite3.connect ( os.path.join ( os.getcwd () ,
     #                                      "datasets" ,
     #                                      "sql_databases" ,
-    #                                      "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs_4h.db" ) )
+    #                                      "async_all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs_4h.db" ) )
 
     # coroutines = [await get_hisorical_data_from_exchange_for_many_symbols(exchange ) for exchange in  exchanges_list]
     # await asyncio.gather(*coroutines, return_exceptions = True)
     #
-    usdt_trading_pair_number = 0
+    btc_trading_pair_number = 0
     counter = 0
     global new_counter
-    global list_of_inactive_pairs
+
     loop=asyncio.get_event_loop()
     tasks=[loop.create_task(get_hisorical_data_from_exchange_for_many_symbols(exchange,
                                                                               counter,
-                                                                              connection_to_usdt_trading_pairs_daily_ohlcv)) for exchange in  exchanges_list]
+                                                                              connection_to_btc_trading_pairs_daily_ohlcv,
+                                                                              )) for exchange in  exchanges_list]
 
     loop.run_until_complete(asyncio.wait(tasks))
     loop.close()
-    connection_to_usdt_trading_pairs_daily_ohlcv.close()
-    # connection_to_usdt_trading_pairs_4h_ohlcv.close ()
-    print("list_of_inactive_pairs\n",list_of_inactive_pairs)
-    print("len(list_of_inactive_pairs=",len(list_of_inactive_pairs))
+    connection_to_btc_trading_pairs_daily_ohlcv.close()
+    # connection_to_btc_trading_pairs_4h_ohlcv.close ()
     end = time.perf_counter ()
     print("time in seconds is ", end-start)
     print ( "time in minutes is " , (end - start)/60.0 )
     print ( "time in hours is " , (end - start) / 60.0/60.0 )
 if __name__=="__main__":
-    fetch_historical_usdt_pairs_asynchronously()
+    fetch_historical_btc_pairs_asynchronously()
 #asyncio.run(get_hisorical_data_from_exchange_for_many_symbols_and_exchanges())
 

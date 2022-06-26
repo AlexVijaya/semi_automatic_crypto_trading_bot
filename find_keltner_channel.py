@@ -7,6 +7,7 @@ import datetime
 import traceback
 import datetime as dt
 from ta.volatility import KeltnerChannel
+from collections import Counter
 
 def create_empty_database(path_to_db):
     '''create empty salite db for a given path'''
@@ -19,7 +20,7 @@ def create_empty_database(path_to_db):
     finally:
         if conn:
             conn.close()
-    pass
+
 
 
 def drop_table_from_database(table_name,path_to_database):
@@ -110,10 +111,16 @@ def find_mirror_levels_in_database_and_add_kc_to_db(async_var):
                                 connection_to_btc_and_usdt_trading_pairs )
         print("mirror_df\n",mirror_df)
         for row in range(0,len(mirror_df)):
-            joint_string_for_table_name=mirror_df.loc[row,"USDT_pair"]+'_on_'+mirror_df.loc[row,"exchange"]
+            joint_string_for_table_name=mirror_df.loc[row,"USDT_pair"]+\
+                                        '_on_'+mirror_df.loc[row,"exchange"]+\
+                                        '_at_'+f'{mirror_df.loc[row,"mirror_level"]}'
             print("row=",row)
             print ( "joint_string_for_table_name=" , joint_string_for_table_name )
             list_of_table_names.append(joint_string_for_table_name)
+
+        result_of_counting=Counter(list_of_table_names)
+        print("result_of_counting\n",result_of_counting)
+
         #time.sleep(30000)
         pass
     except Exception as e:
@@ -139,6 +146,9 @@ def find_mirror_levels_in_database_and_add_kc_to_db(async_var):
     for table_in_db in list_of_table_names:
         try:
             counter=counter+1
+            table_in_db_with_ml=table_in_db
+            table_in_db=table_in_db.split('_at_')[0]
+
             data_df=\
                 pd.read_sql_query(f'''select * from "{table_in_db}"''' ,
                                   connection_to_usdt_trading_pairs_ohlcv)
@@ -178,7 +188,7 @@ def find_mirror_levels_in_database_and_add_kc_to_db(async_var):
             print(f"counter={counter} ")
             if not (pair_and_exchange_from_data_df == pair_and_exchange_from_data_df_with_kc):
                 print(f"pair is {pair_and_exchange_from_data_df_with_kc}")
-            data_df_with_kc.to_sql(f'''{table_in_db}''',
+            data_df_with_kc.to_sql(f'''{table_in_db_with_ml}''',
                                    connection_to_usdt_trading_pairs_ohlcv_with_kc,
                                    if_exists = "append")
 
