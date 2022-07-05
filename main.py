@@ -28,6 +28,7 @@ def main():
         find_if_high_or_low_yesterday_coincides_with_mirror_level.find_mirror_levels_in_database(async_var)
         plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange(async_var)
         plot_ohlcv_chart_with_price_approaching_mirror_levels.plot_ohlcv_chart_with_price_approaching_mirror_levels()
+
     except Exception as e:
         print(e)
 

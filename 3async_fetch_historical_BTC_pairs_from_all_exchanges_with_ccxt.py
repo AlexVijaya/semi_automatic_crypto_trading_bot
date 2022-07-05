@@ -5,11 +5,12 @@ import os
 import sys
 import time
 import traceback
-
+#from find_keltner_channel import create_empty_database
 import pandas as pd
 import talib
 import datetime as dt
 import ccxt.async_support as ccxt  # noqa: E402
+from pathlib import Path
 # async def get_hisorical_data_from_exchange_for_one_symbol(exchange_object, usdt_pair):
 #
 #     #await exchange_object.load_markets ()
@@ -36,11 +37,11 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
                                                             connection_to_btc_trading_pairs_ohlcv):
     print("exchange=",exchange)
     global new_counter
-
+    exchange_object = getattr ( ccxt , exchange ) ()
+    exchange_object.enableRateLimit = True
     global not_active_pair_counter
     try:
-        exchange_object = getattr ( ccxt , exchange ) ()
-        exchange_object.enableRateLimit = True
+
         # connection_to_btc_trading_pairs_ohlcv = \
         #     sqlite3.connect ( os.path.join ( os.getcwd () ,
         #                                      "datasets" ,
@@ -188,8 +189,9 @@ async def get_hisorical_data_from_exchange_for_many_symbols(exchange,
 
         #await exchange_object.close ()
 
-    # finally:
-    #     await exchange_object.close ()
+    finally:
+        await exchange_object.close ()
+        print("exchange_object.close ok")
 
 
 def fetch_historical_btc_pairs_asynchronously(exchanges_list):
@@ -218,11 +220,25 @@ def fetch_historical_btc_pairs_asynchronously(exchanges_list):
     #                 'zipmex', 'zonda']
     #exchanges_list=ccxt.exchanges
 
-    connection_to_btc_trading_pairs_daily_ohlcv = \
-        sqlite3.connect ( os.path.join ( os.getcwd () ,
+    path_to_async_ohlcv_db=os.path.join ( os.getcwd () ,
                                          "datasets" ,
-                                         "sql_databases" ,
-                                         "async_all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs.db" ) )
+                                         "sql_databases" ,"async_databases",
+                                         "3async_all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs.db" )
+
+    path_to_async_ohlcv_db_dir = os.path.join ( os.getcwd () ,
+                                            "datasets" ,
+                                            "sql_databases","async_databases"  )
+
+    Path ( path_to_async_ohlcv_db_dir ).mkdir ( parents = True , exist_ok = True )
+    if os.path.exists ( path_to_async_ohlcv_db ):
+        os.remove ( path_to_async_ohlcv_db )
+    print ( "before removal of db" )
+    # time.sleep(20)
+    print ( "after removal of db" )
+    #create_empty_database ( path_to_async_ohlcv_db )
+
+    connection_to_btc_trading_pairs_daily_ohlcv = \
+        sqlite3.connect ( path_to_async_ohlcv_db)
 
     # connection_to_btc_trading_pairs_4h_ohlcv = \
     #     sqlite3.connect ( os.path.join ( os.getcwd () ,
@@ -255,53 +271,11 @@ if __name__=="__main__":
     exchange_list=ccxt.exchanges
     how_many_exchanges=len(exchange_list)
     try:
-        fetch_historical_btc_pairs_asynchronously(exchange_list[0:10])
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[11:20] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[21:30] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[31:40] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[41:50] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[51:60] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[61:70] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[71:80] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[81:90] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[91:100] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[101:110] )
-    except:
-        pass
-    try:
-        fetch_historical_btc_pairs_asynchronously ( exchange_list[110:how_many_exchanges] )
-    except:
-        pass
+        fetch_historical_btc_pairs_asynchronously(exchange_list[21:30])
+    except Exception as e:
+        print ( e )
+        traceback.print_exc ()
+
 
 #asyncio.run(get_hisorical_data_from_exchange_for_many_symbols_and_exchanges())
 

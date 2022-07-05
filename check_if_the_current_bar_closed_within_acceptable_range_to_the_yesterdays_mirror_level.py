@@ -3,8 +3,10 @@ import pandas as pd
 import time
 import datetime
 import sqlite3
+import talib
 #import ccxt.async_support as ccxt
 import ccxt
+import datetime as dt
 from find_keltner_channel import create_empty_database
 def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_level():
     start = time.perf_counter ()
@@ -48,9 +50,7 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
 
     if os.path.exists(path_to_usdt_trading_pairs_ohlcv_ready_for_rebound):
         os.remove(path_to_usdt_trading_pairs_ohlcv_ready_for_rebound)
-    print ( "before removal of db" )
-    #time.sleep(20)
-    print ( "after removal of db" )
+
     create_empty_database(path_to_usdt_trading_pairs_ohlcv_ready_for_rebound)
 
     connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound = \
@@ -59,8 +59,8 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
         try:
             usdt_trading_pair =mirror_levels_df.loc[row_number,'USDT_pair']
             exchange = mirror_levels_df.loc[row_number,'exchange']
-            #print ("usdt_trading_pair=",usdt_trading_pair)
-            #print ("exchange=",exchange)
+            print ("usdt_trading_pair=",usdt_trading_pair)
+            print ("exchange=",exchange)
             mirror_level = mirror_levels_df.loc[row_number , 'mirror_level']
             open_time_of_candle_with_legit_low = mirror_levels_df.loc[row_number ,
                                                                       'open_time_of_candle_with_legit_low']
@@ -70,6 +70,8 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
                                                       'timestamp_for_low'])/1000.0
             timestamp_for_high = (mirror_levels_df.loc[row_number ,
                                                        'timestamp_for_high'])/1000.0
+            print("current_timestamp-timestamp_for_low=",
+                  current_timestamp-timestamp_for_low)
             if (current_timestamp-timestamp_for_low)<86400*2:
                 #last mirror level bar confirming level was was formed by low
                 print(f"recently mirror level (low) was hit for {usdt_trading_pair} on {exchange}")
@@ -139,6 +141,13 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
                     if last_high >= (mirror_level - backlash):
                         print ( f"last high for {usdt_trading_pair} on {exchange} "
                                 f" is within backlash"  )
+                        data_df['open_time'] = \
+                            [dt.datetime.fromtimestamp ( x / 1000.0 ) for x in data_df.index]
+                        data_df.set_index ( 'open_time' )
+                        data_df['psar'] = talib.SAR ( data_df.high ,
+                                                      data_df.low ,
+                                                      acceleration = 0.02 ,
+                                                      maximum = 0.2 )
                         data_df.to_sql ( f"{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" ,
                                          connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound ,
                                          if_exists = 'replace' )

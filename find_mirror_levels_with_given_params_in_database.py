@@ -216,27 +216,3 @@ def find_mirror_levels_in_database(async_var):
 if __name__=="__main__":
     async_var=True
     find_mirror_levels_in_database(async_var)
-
-#print("__name__",__name__)
-# find_mirror_levels_in_database ()
-#
-# def drop_duplicates_in_db():
-#     path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
-#                                                         "sql_databases" ,
-#                                                         "btc_and_usdt_pairs_from_all_exchanges.db" )
-#
-#     connection_to_btc_and_usdt_trading_pairs = \
-#         sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
-#     mirror_levels_df=pd.read_sql_query("mirror_levels_calculated_separately",
-#                                        connection_to_btc_and_usdt_trading_pairs)
-#     print("number of trading pairs with duplicates=",
-#           len(mirror_levels_df))
-#     mirror_levels_df.drop_duplicates(subset = ["USDT_pair","mirror_level"],
-#                                      keep = "first",
-#                                      inplace = True)
-#     mirror_levels_df.to_sql("mirror_levels_without_duplicates",
-#                             connection_to_btc_and_usdt_trading_pairs)
-#     print ( "number of trading pairs without duplicates=" ,
-#             len ( mirror_levels_df ) )
-#     pass
-# drop_duplicates_in_db()
