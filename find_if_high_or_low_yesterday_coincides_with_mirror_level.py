@@ -166,7 +166,7 @@ def find_mirror_levels_in_database(async_var):
                                 connection_to_btc_and_usdt_trading_pairs )
         print("mirror_df\n",mirror_df.to_string())
         list_or_tables_with_recent_highs_and_lows_which_coincide_with_mirror_level=[]
-        usdt_pair_row_conter=0
+        usdt_pair_row_counter=0
         for row in range(0,len(mirror_df)):
             joint_string_for_table_name=mirror_df.loc[row,"USDT_pair"]+'_on_'+mirror_df.loc[row,"exchange"]
             mirror_level=mirror_df.loc(axis=0)[row,"mirror_level"]
@@ -198,7 +198,7 @@ def find_mirror_levels_in_database(async_var):
                                                                         row)
             if usdt_pair_recent==None:
                 continue
-            usdt_pair_row_conter=usdt_pair_row_conter+1
+            usdt_pair_row_counter=usdt_pair_row_counter+1
             print ( "usdt_pair_recent\n" , usdt_pair_recent )
             #time.sleep ( 1000 )
 
@@ -211,9 +211,9 @@ def find_mirror_levels_in_database(async_var):
 
 
             #add names of usdt pairs and exchanges to a data base
-            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter-1,"usdt_pair"]=usdt_pair_recent
-            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter-1,"exchange_recent"] = exchange_recent
-            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_conter - 1 , "next_date_after_low_or_high_coincided_with_mirror_level"] = last_date_without_time
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_counter-1,"usdt_pair"]=usdt_pair_recent
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_counter-1,"exchange_recent"] = exchange_recent
+            usdt_pair_name_and_exchange_df.loc[usdt_pair_row_counter - 1 , "next_date_after_low_or_high_coincided_with_mirror_level"] = last_date_without_time
             print("usdt_pair_name_and_exchange_df\n",usdt_pair_name_and_exchange_df)
             #time.sleep(1000)
             usdt_pair_name_and_exchange_df.to_sql ( '''usdt_pair_names_and_exchanges_where_recent_low_or_high_is_equal_to_mirror_level''' ,

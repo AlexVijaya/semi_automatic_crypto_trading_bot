@@ -94,7 +94,7 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
                 true_range = penultimate_high - penultimate_low
                 last_high = data_df.iloc[-1]["high"]
                 last_low = data_df.iloc[-1]["low"]
-                backlash=true_range*0.2
+                backlash=true_range*0.2*0.2
                 print ( "backlash\n" , backlash )
                 print ( "mirror_level+backlash\n" , mirror_level+backlash )
                 print ( "true_range\n" , true_range )

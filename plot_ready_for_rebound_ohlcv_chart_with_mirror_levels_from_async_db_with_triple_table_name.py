@@ -61,7 +61,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange ():
                                      connection_to_btc_and_usdt_trading_pairs )
     #print ( "mirror_levels_df\n" , mirror_levels_df )
 
-    # delete preveiously plotted charts
+    # delete previously plotted charts
     folder_to_be_deleted = os.path.join ( os.getcwd () ,
                                           'datasets' ,
                                           'plots' ,

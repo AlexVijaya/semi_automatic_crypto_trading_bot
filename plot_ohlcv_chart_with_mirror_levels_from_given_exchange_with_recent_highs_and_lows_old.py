@@ -102,11 +102,6 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
         print ("usdt_trading_pair=",usdt_trading_pair)
         print ("exchange=",exchange)
 
-
-        timestamp_for_low_original=mirror_levels_df.loc[row_number , 'timestamp_for_low']
-        timestamp_for_high_original = mirror_levels_df.loc[row_number , 'timestamp_for_high']
-
-
         timestamp_for_low = (mirror_levels_df.loc[row_number , 'timestamp_for_low']) / 1000.0
         timestamp_for_high = (mirror_levels_df.loc[row_number , 'timestamp_for_high']) / 1000.0
         if  ((current_timestamp - timestamp_for_low) < (86400 * 2)) or\
@@ -230,11 +225,10 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                 #print ( f'open_time_of_another_high_list={open_time_of_another_high_list}' )
                 #print("-"*80)
                 print ( "historical_data_for_usdt_trading_pair_df\n" ,
-                        historical_data_for_usdt_trading_pair_df.to_string() )
+                        historical_data_for_usdt_trading_pair_df )
 
-                number_of_charts = 2
+                number_of_charts = 1
 
-                last_timestamp=historical_data_for_usdt_trading_pair_df["Timestamp"].iloc[-1]
                 last_date_with_time=historical_data_for_usdt_trading_pair_df["open_time"].iloc[-1]
                 print("type(last_date_with_time)\n",type(last_date_with_time))
                 print ( "last_date_with_time\n" , last_date_with_time)
@@ -249,7 +243,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                     where_to_plot_html = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
+                                                   'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
                                                     f'recent_mirror_plots_on_{last_date_without_time}',
                                                    'crypto_exchange_plots_html',
                                                    f'{counter}_{usdt_trading_pair_without_slash}_on_{exchange}.html')
@@ -257,21 +251,21 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                     where_to_plot_pdf = os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
+                                                       'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
                                                         f'recent_mirror_plots_on_{last_date_without_time}',
                                                        'crypto_exchange_plots_pdf',
                                                        f'{counter}_{usdt_trading_pair_without_slash}_on_{exchange}.pdf' )
                     where_to_plot_svg = os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
+                                                       'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
                                                         f'recent_mirror_plots_on_{last_date_without_time}',
                                                        'crypto_exchange_plots_svg' ,
                                                        f'{counter}_{usdt_trading_pair_without_slash}_on_{exchange}.svg' )
                     where_to_plot_jpg = os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
+                                                       'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
                                                         f'recent_mirror_plots_on_{last_date_without_time}',
                                                        'crypto_exchange_plots_jpg' ,
                                                        f'{counter}_{usdt_trading_pair_without_slash}_on_{exchange}.jpg' )
@@ -279,7 +273,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                     where_to_plot_png = os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
+                                                       'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level' ,
                                                         f'recent_mirror_plots_on_{last_date_without_time}',
                                                        'crypto_exchange_plots_png' ,
                                                        f'{counter}_{usdt_trading_pair_without_slash}_on_{exchange}.png' )
@@ -288,7 +282,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                     path_to_databases = os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level',
+                                                       'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level',
                                                         f'recent_mirror_plots_on_{last_date_without_time}' )
                     Path ( path_to_databases ).mkdir ( parents = True , exist_ok = True )
                     #create directories for all hh images
@@ -298,17 +292,17 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                             os.path.join ( os.getcwd () ,
                                                            'datasets' ,
                                                            'plots' ,
-                                                           'double_crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level',
+                                                           'crypto_exchange_plots_recent_highs_and_lows_equal_mirror_level',
                                                             f'recent_mirror_plots_on_{last_date_without_time}',
                                                            f'crypto_exchange_plots_{img_format}')
                         Path ( path_to_special_format_images_of_mirror_charts ).mkdir ( parents = True , exist_ok = True )
 
-                    fig = make_subplots ( rows = number_of_charts , cols = 1 ,
+                    fig = make_subplots ( rows = 1 , cols = number_of_charts ,
                                           shared_xaxes = False ,
                                           subplot_titles = tuple ( usdt_trading_pair ) ,
-                                           )
-                    fig.update_layout ( height = 1500 * number_of_charts ,
-                                        width = 4000 ,
+                                          specs = [[{"secondary_y": True}]] )
+                    fig.update_layout ( height = 1500 ,
+                                        width = 4000 * number_of_charts ,
                                         title_text = f'{usdt_trading_pair} '
                                                      f'on {exchange} with mirror level={mirror_level} on {last_date_without_time}' ,
                                         font = dict (
@@ -316,8 +310,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                                             size = 40 ,
                                             color = "RebeccaPurple"
                                         ) )
-                    fig.update_xaxes ( rangeslider = {'visible': False} , row = 1 , col = 1 )
-                    fig.update_xaxes ( rangeslider = {'visible': False} , row = 2 , col = 1 )
+                    fig.update_xaxes ( rangeslider = {'visible': False} , row = 1 , col = number_of_charts )
                     config = dict ( {'scrollZoom': True} )
                     # print(type("historical_data_for_usdt_trading_pair_df['open_time']\n",
                     #            historical_data_for_usdt_trading_pair_df.loc[3,'open_time']))
@@ -332,45 +325,6 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                                                          close = historical_data_for_usdt_trading_pair_df['close'] ,
                                                          increasing_line_color = 'green' , decreasing_line_color = 'red'
                                                          ) , row = 1 , col = 1 , secondary_y = False )
-
-                        row_number_of_low=historical_data_for_usdt_trading_pair_df.index[
-                            historical_data_for_usdt_trading_pair_df["Timestamp"]==timestamp_for_low_original].values
-                        row_number_of_high = historical_data_for_usdt_trading_pair_df.index[
-                            historical_data_for_usdt_trading_pair_df["Timestamp"] == timestamp_for_high_original].values
-
-                        row_number_of_low=int(row_number_of_low[0])
-                        row_number_of_high=int(row_number_of_high[0])
-
-                        print ( "row_number_of_low=" , row_number_of_low )
-                        print ( "row_number_of_high=" , row_number_of_high )
-
-                        print ( "timestamp_for_low=" , timestamp_for_low )
-                        print ( "timestamp_for_high=" , timestamp_for_high )
-
-                        try:
-                            how_many_last_rows_to_plot=0
-                            if row_number_of_low > row_number_of_high:
-                                row_for_plotting_start=row_number_of_high-20
-                                how_many_last_rows_to_plot=\
-                                    len(historical_data_for_usdt_trading_pair_df)-row_for_plotting_start
-                                print ( "how_many_last_rows_to_plot=" , how_many_last_rows_to_plot )
-                            else:
-                                row_for_plotting_start = row_number_of_low - 20
-                                how_many_last_rows_to_plot = \
-                                    len ( historical_data_for_usdt_trading_pair_df ) - row_for_plotting_start
-                                print ( "how_many_last_rows_to_plot=" , how_many_last_rows_to_plot )
-
-
-                            fig.add_trace ( go.Candlestick ( name = f'{usdt_trading_pair} on {exchange}' ,
-                                                             x = historical_data_for_usdt_trading_pair_df['open_time'].tail(how_many_last_rows_to_plot) ,
-                                                             open = historical_data_for_usdt_trading_pair_df['open'].tail(how_many_last_rows_to_plot) ,
-                                                             high = historical_data_for_usdt_trading_pair_df['high'].tail(how_many_last_rows_to_plot) ,
-                                                             low = historical_data_for_usdt_trading_pair_df['low'].tail(how_many_last_rows_to_plot) ,
-                                                             close = historical_data_for_usdt_trading_pair_df['close'].tail(how_many_last_rows_to_plot) ,
-                                                             increasing_line_color = 'green' , decreasing_line_color = 'red'
-                                                             ) , row = 2, col = 1 , secondary_y = False )
-                        except:
-                            pass
 
                         try:
                             if len(open_time_of_another_high_list)>0:
@@ -390,32 +344,6 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                                                   name = "lows of mirror level" , row = 1 , col = 1 )
                         except:
                             pass
-
-                        try:
-                            if len(open_time_of_another_high_list)>0:
-                                fig.add_scatter ( x = historical_data_for_usdt_trading_pair_df["open_time_of_another_high"],
-                                                  y = historical_data_for_usdt_trading_pair_df["mirror_level_of_another_high"] ,
-                                                  mode = "markers" ,
-                                                  marker = dict ( color = 'cyan' , size = 15 ) ,
-                                                  name = "highs of mirror level" , row = 2 , col = 1 )
-                                print("printing dots")
-                        except Exception as e:
-                            print("error=",e)
-                            traceback.print_exc()
-                        try:
-                            if len(open_time_of_another_low_list)>0:
-                                fig.add_scatter ( x = historical_data_for_usdt_trading_pair_df["open_time_of_another_low"] ,
-                                                  y = historical_data_for_usdt_trading_pair_df["mirror_level_of_another_low"] ,
-                                                  mode = "markers" ,
-                                                  marker = dict ( color = 'magenta' , size = 15 ) ,
-                                                  name = "lows of mirror level" , row = 2 , col = 1 )
-                        except Exception as e:
-                            print("error=",e)
-                            traceback.print_exc()
-                            pass
-
-
-
                         fig.add_scatter ( x = [open_time_of_candle_with_legit_low] ,
                                           y = [mirror_level] , mode = "markers" ,
                                           marker = dict ( color = 'red' , size = 15 ) ,
@@ -424,15 +352,6 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
                                           y = [mirror_level] , mode = "markers" ,
                                           marker = dict ( color = 'green' , size = 15 ) ,
                                           name = "high of mirror level" , row = 1 , col = 1 )
-
-                        fig.add_scatter ( x = [open_time_of_candle_with_legit_low] ,
-                                          y = [mirror_level] , mode = "markers" ,
-                                          marker = dict ( color = 'red' , size = 15 ) ,
-                                          name = "low of mirror level" , row = 2 , col = 1 )
-                        fig.add_scatter ( x = [open_time_of_candle_with_legit_high] ,
-                                          y = [mirror_level] , mode = "markers" ,
-                                          marker = dict ( color = 'green' , size = 15 ) ,
-                                          name = "high of mirror level" , row = 2 , col = 1 )
 
                         # fig.add_shape ( type = 'line' , x0 = historical_data_for_usdt_trading_pair_df.loc[0,'open_time'] ,
                         #                 x1 = historical_data_for_usdt_trading_pair_df.loc[-1,'open_time'] ,
@@ -478,8 +397,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (async_var):
 
 
 
-                        #fig.update_xaxes ( patch = dict ( type = 'category' ) , row = 1 , col = 1 )
-                        #fig.update_xaxes ( patch = dict ( type = 'category' ) , row = 2 , col = 1 )
+                        fig.update_xaxes ( patch = dict ( type = 'category' ) , row = 1 , col = 1 )
 
                         # fig.update_layout ( height = 700  , width = 20000 * i, title_text = 'Charts of some crypto assets' )
                         fig.update_layout ( margin_autoexpand = True )

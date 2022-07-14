@@ -54,8 +54,22 @@ def find_asc_desc_triangles_in_database(async_var):
                                                 'timestamp_for_low' , 'timestamp_for_high' ,
                                                 'low' , 'high' , 'open_time_of_candle_with_legit_low' ,
                                                 'open_time_of_candle_with_legit_high','average_volume'] )
+
+    # path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
+    #                                                     "sql_databases" ,
+    #                                                     "btc_and_usdt_pairs_from_all_exchanges.db" )
+    #
+    # connection_to_btc_and_usdt_trading_pairs = \
+    #     sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
+
     try:
-        drop_table_from_database ( "asc_desc_triangles_levels" ,
+        drop_table_from_database ( "levels_formed_by_lows" ,
+                                   path_to_db_with_USDT_and_btc_pairs )
+    except:
+        print ( "cant drop table from db" )
+
+    try:
+        drop_table_from_database ( "levels_formed_by_highs" ,
                                    path_to_db_with_USDT_and_btc_pairs )
     except:
         print ( "cant drop table from db" )
@@ -74,6 +88,19 @@ def find_asc_desc_triangles_in_database(async_var):
     list_of_pairs_and_exchanges_with_touches_of_level_by_low=[]
     list_of_pairs_and_exchanges_with_touches_of_level_by_high=[]
     not_recent_pair_counter=0
+    counter_for_low_level_in_final_df = 0
+    counter_for_high_level_in_final_df = 0
+
+
+    levels_formed_by_lows_df = pd.DataFrame ( columns = ['USDT_pair' ,
+                                                         'exchange' ,
+                                                         'level_formed_by_low' ,
+                                                         'average_volume','timestamp_1','timestamp_2','timestamp_3'] )
+    levels_formed_by_highs_df = pd.DataFrame ( columns = ['USDT_pair' ,
+                                                          'exchange' ,
+                                                          'level_formed_by_high' ,
+                                                          'average_volume','timestamp_1','timestamp_2','timestamp_3'] )
+
     for table_in_db in list_of_tables:
         try:
             counter=counter+1
@@ -175,6 +202,7 @@ def find_asc_desc_triangles_in_database(async_var):
             so_many_last_days_for_level_calculation=30
             so_many_number_of_touches_of_level_by_highs=2
             so_many_number_of_touches_of_level_by_lows = 2
+
             #
             #
             # last_n_days_slice_from_ohlcv_data_df=\
@@ -304,6 +332,7 @@ def find_asc_desc_triangles_in_database(async_var):
                                         data_df_slice_plus_number_of_equal_lows_and_highs.dropna ( subset =
                                                                                                    ["high_level"] ,
                                                                                                    how = "all" )
+                                    #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++#
 
                                     dict_of_lows_legit_or_not_legit={}
                                     dict_of_highs_legit_or_not_legit = {}
@@ -367,6 +396,89 @@ def find_asc_desc_triangles_in_database(async_var):
                                     print ( "dict_of_lows_legit_or_not_legit\n" ,
                                             dict_of_lows_legit_or_not_legit )
 
+                                    timestamp_for_high_level=None
+                                    timestamp_for_low_level = None
+
+                                    dict_of_lows_legit_or_not_legit_with_only_legit_level = {}
+                                    dict_of_legit_low_levels_with_counter = {}
+                                    for level in dict_of_lows_legit_or_not_legit.keys ():
+                                        counter = 0
+
+                                        for legit_or_not_legit_string in dict_of_lows_legit_or_not_legit[level]:
+                                            if "not_legit" not in legit_or_not_legit_string:
+                                                counter = counter + 1
+                                                print ( f"{level} has no non legit"
+                                                        f" lows in dict {dict_of_lows_legit_or_not_legit[level]}" )
+                                                # del dict_of_lows_legit_or_not_legit[level]
+                                                print ( "key deleted successfully " )
+
+                                                print ( "counter_number_of_legit_level_occurrences" ,
+                                                        counter )
+                                                # number_of_legit_level_occurencies=len(dict_of_lows_legit_or_not_legit[level])
+                                                if level not in dict_of_lows_legit_or_not_legit_with_only_legit_level:
+                                                    dict_of_lows_legit_or_not_legit_with_only_legit_level[level] \
+                                                        = [legit_or_not_legit_string]
+                                                else:
+                                                    dict_of_lows_legit_or_not_legit_with_only_legit_level[
+                                                        level].append ( legit_or_not_legit_string )
+
+                                                if counter > 1:
+                                                    if level not in dict_of_legit_low_levels_with_counter:
+                                                        dict_of_legit_low_levels_with_counter[level] \
+                                                            = [counter]
+                                                        print ( "legit_or_not_legit_string_with_counter" ,
+                                                                legit_or_not_legit_string )
+                                                    else:
+                                                        dict_of_legit_low_levels_with_counter[level].append ( counter )
+
+
+                                            else:
+                                                print ( f"{level} has non legit"
+                                                        f" lows in dict {dict_of_lows_legit_or_not_legit[level]}" )
+
+                                        print ( "dict_of_lows_legit_or_not_legit_with_only_legit_level" ,
+                                                dict_of_lows_legit_or_not_legit_with_only_legit_level )
+                                        if len ( dict_of_legit_low_levels_with_counter ) > 0:
+                                            for level in dict_of_legit_low_levels_with_counter.keys ():
+
+                                                print ( "dict_of_legit_low_levels_with_counter" ,
+                                                        dict_of_legit_low_levels_with_counter )
+                                                counter_for_timestamp = 0
+                                                counter_for_low_level_in_final_df = counter_for_low_level_in_final_df + 1
+                                                for string_with_timestamp in \
+                                                dict_of_lows_legit_or_not_legit_with_only_legit_level[level]:
+                                                    counter_for_timestamp = counter_for_timestamp + 1
+
+                                                    string_with_timestamp = string_with_timestamp.replace (
+                                                        "legit_at_" , "" )
+                                                    timestamp = int ( string_with_timestamp )
+                                                    print ( "string_with_timestamp" )
+                                                    print ( f"{usdt_pair}_on_{exchange}_at_low_level_{level}" )
+                                                    print ( timestamp )
+                                                    # levels_formed_by_lows_df['USDT_pair'].loc[counter_for_low_level_in_final_df-1]=usdt_pair
+                                                    # levels_formed_by_lows_df['exchange'].loc[counter_for_low_level_in_final_df-1] = exchange
+                                                    # levels_formed_by_lows_df['average_volume'].loc[counter_for_low_level_in_final_df-1] = average_volume
+                                                    # levels_formed_by_lows_df['level_formed_by_low'].loc[counter_for_low_level_in_final_df-1] = level
+                                                    # # if f'timestamp_{counter_for_timestamp}' not in levels_formed_by_lows_df.columns:
+                                                    # #     levels_formed_by_lows_df[f'timestamp_{counter_for_timestamp}']=""
+                                                    # levels_formed_by_lows_df[f'timestamp_{counter_for_timestamp}'].loc[counter_for_low_level_in_final_df-1] = timestamp
+
+                                                    levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,'USDT_pair'] = usdt_pair
+                                                    levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,'exchange'] = exchange
+                                                    levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,'average_volume'] = average_volume
+                                                    levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,'level_formed_by_low'] = level
+                                                    # if f'timestamp_{counter_for_timestamp}' not in levels_formed_by_lows_df.columns:
+                                                    #     levels_formed_by_lows_df[f'timestamp_{counter_for_timestamp}']=""
+                                                    levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,f'timestamp_{counter_for_timestamp}'] = timestamp
+
+                                                    print ( "levels_formed_by_lows_df" )
+                                                    print ( levels_formed_by_lows_df.to_string() )
+
+
+                                    #####################++++++++++++++++++++----------++++++++++++++++++++++++#
+
+
+
 
                                     for row_of_high_levels in range(len(data_df_slice_plus_number_of_equal_highs_without_NaNs)):
                                         high_level=\
@@ -427,9 +539,88 @@ def find_asc_desc_triangles_in_database(async_var):
                                             pass
                                     print ( "dict_of_highs_legit_or_not_legit\n" ,
                                             dict_of_highs_legit_or_not_legit )
+                                    ###############################################
+                                    ###############################################
+
+                                    dict_of_highs_legit_or_not_legit_with_only_legit_level={}
+                                    dict_of_legit_high_levels_with_counter={}
+                                    for level in dict_of_highs_legit_or_not_legit.keys():
+                                        counter=0
+
+                                        for legit_or_not_legit_string in dict_of_highs_legit_or_not_legit[level]:
+                                            if  "not_legit" not in legit_or_not_legit_string:
+                                                counter=counter+1
+                                                print(f"{level} has no non legit"
+                                                      f" highs in dict {dict_of_highs_legit_or_not_legit[level]}")
+                                                #del dict_of_highs_legit_or_not_legit[level]
+                                                print("key deleted successfully ")
+
+                                                print("counter_number_of_legit_level_occurrences",
+                                                      counter)
+                                                #number_of_legit_level_occurencies=len(dict_of_highs_legit_or_not_legit[level])
+                                                if level not in dict_of_highs_legit_or_not_legit_with_only_legit_level:
+                                                    dict_of_highs_legit_or_not_legit_with_only_legit_level[level]\
+                                                        =[legit_or_not_legit_string]
+                                                else:
+                                                    dict_of_highs_legit_or_not_legit_with_only_legit_level[level].append (legit_or_not_legit_string )
+
+                                                if counter>1:
+                                                    if level not in dict_of_legit_high_levels_with_counter:
+                                                        dict_of_legit_high_levels_with_counter[level]\
+                                                            =[counter]
+                                                        print("legit_or_not_legit_string_with_counter",legit_or_not_legit_string)
+                                                    else:
+                                                        dict_of_legit_high_levels_with_counter[level].append (counter )
 
 
+                                            else:
+                                                print ( f"{level} has non legit"
+                                                        f" highs in dict {dict_of_highs_legit_or_not_legit[level]}" )
 
+
+                                        print("dict_of_highs_legit_or_not_legit_with_only_legit_level",
+                                              dict_of_highs_legit_or_not_legit_with_only_legit_level)
+                                        if len(dict_of_legit_high_levels_with_counter)>0:
+                                            for level in dict_of_legit_high_levels_with_counter.keys():
+
+
+                                                print ( "dict_of_legit_high_levels_with_counter" ,
+                                                        dict_of_legit_high_levels_with_counter )
+                                                counter_for_timestamp=0
+                                                counter_for_high_level_in_final_df=counter_for_high_level_in_final_df+1
+                                                for string_with_timestamp in dict_of_highs_legit_or_not_legit_with_only_legit_level[level]:
+                                                    counter_for_timestamp=counter_for_timestamp+1
+
+                                                    string_with_timestamp=string_with_timestamp.replace("legit_at_","")
+                                                    timestamp=int(string_with_timestamp)
+                                                    print ( "string_with_timestamp" )
+                                                    print ( f"{usdt_pair}_on_{exchange}_at_high_level_{level}" )
+                                                    print ( string_with_timestamp )
+                                                    print ( timestamp )
+                                                    # levels_formed_by_highs_df['USDT_pair'].loc[counter_for_high_level_in_final_df-1] = usdt_pair
+                                                    # levels_formed_by_highs_df['exchange'].loc[counter_for_high_level_in_final_df-1] = exchange
+                                                    # levels_formed_by_highs_df['average_volume'].loc[counter_for_high_level_in_final_df-1] = average_volume
+                                                    # levels_formed_by_highs_df['level_formed_by_high'].loc[counter_for_high_level_in_final_df-1] = level
+                                                    # # if f'timestamp_{counter_for_timestamp}' not in levels_formed_by_highs_df.columns:
+                                                    # #     levels_formed_by_highs_df[f'timestamp_{counter_for_timestamp}']=""
+                                                    # levels_formed_by_highs_df[
+                                                    #     f'timestamp_{counter_for_timestamp}'].loc[counter_for_high_level_in_final_df-1] = timestamp
+                                                    #
+
+                                                    levels_formed_by_highs_df.loc[
+                                                        counter_for_high_level_in_final_df - 1 , 'USDT_pair'] = usdt_pair
+                                                    levels_formed_by_highs_df.loc[
+                                                        counter_for_high_level_in_final_df - 1 , 'exchange'] = exchange
+                                                    levels_formed_by_highs_df.loc[
+                                                        counter_for_high_level_in_final_df - 1 , 'average_volume'] = average_volume
+                                                    levels_formed_by_highs_df.loc[
+                                                        counter_for_high_level_in_final_df - 1 , 'level_formed_by_high'] = level
+                                                    # if f'timestamp_{counter_for_timestamp}' not in levels_formed_by_lows_df.columns:
+                                                    #     levels_formed_by_lows_df[f'timestamp_{counter_for_timestamp}']=""
+                                                    levels_formed_by_highs_df.loc[
+                                                        counter_for_high_level_in_final_df - 1 , f'timestamp_{counter_for_timestamp}'] = timestamp
+
+                                    #####################++++++++++++++++++++----------++++++++++++++++++++++++#
 
 
                                     data_df_slice_plus_number_of_equal_highs_without_NaNs = \
@@ -506,22 +697,22 @@ def find_asc_desc_triangles_in_database(async_var):
                                     print ( "boolian_list_if_all_closes_are_higher_than_prev_closes=" ,
                                             boolian_list_if_all_closes_are_higher_than_prev_closes )
 
-                                    if_pair_has_all_closes_higher_than_prev_closes = all (
-                                        boolian_list_if_all_closes_are_higher_than_prev_closes )
+                                    # if_pair_has_all_closes_higher_than_prev_closes = all (
+                                    #     boolian_list_if_all_closes_are_higher_than_prev_closes )
 
-                                    if if_pair_has_all_closes_higher_than_prev_closes:
-                                        print (f"outer for trading pair {usdt_pair} on {exchange} "
-                                               f"closes_are_higher_than_prev_closes ready for break up" )
-                                        if not all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()):
-                                            print('data_df_slice_plus_number_of_equal_lows_and_highs["high_level"]\n')
-                                            print(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"])
-                                            print('data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()\n')
-                                            print(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull())
-                                            print('all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull())\n')
-                                            print(all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()))
-
-                                            print ( f"for trading pair {usdt_pair} on {exchange} "
-                                                    f"closes_are_higher_than_prev_closes ready for break up" )
+                                    # if if_pair_has_all_closes_higher_than_prev_closes:
+                                    #     print (f"outer for trading pair {usdt_pair} on {exchange} "
+                                    #            f"closes_are_higher_than_prev_closes ready for break up" )
+                                    #     if not all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()):
+                                    #         print('data_df_slice_plus_number_of_equal_lows_and_highs["high_level"]\n')
+                                    #         print(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"])
+                                    #         print('data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()\n')
+                                    #         print(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull())
+                                    #         print('all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull())\n')
+                                    #         print(all(data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].isnull()))
+                                    #
+                                    #         print ( f"for trading pair {usdt_pair} on {exchange} "
+                                    #                 f"closes_are_higher_than_prev_closes ready for break up" )
 
                                     # print (
                                     #     f"for trading pair {usdt_pair} on {exchange} closes_are_higher_than_prev_closes" ,
@@ -562,89 +753,11 @@ def find_asc_desc_triangles_in_database(async_var):
 
                 except Exception as e:
                     print ( f"error with {usdt_pair} on {exchange}" , e )
+                    traceback.print_exc()
 
 
 
 
-                #daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows - 1]
-                #if daily_high == daily_low:
-                    # print ( "daily_low\n" ,
-                    #         daily_low )
-                    # print ( "daily_high\n" ,
-                    #         daily_high )
-                # if row_number_in_lows > 1 and row_number_in_lows < last_several_days_lows_slice_Series.size:
-                #     print ( "found not boundary low" )
-                #
-                # if row_number_in_highs > 1 and row_number_in_highs < last_several_days_highs_slice_Series.size:
-                #     print ( "found not boundary high" )
-                #     if row_number_in_lows > 1 and row_number_in_lows < last_several_days_lows_slice_Series.size:
-                #         prev_daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs - 2]
-                #         next_daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs]
-                #         prev_daily_low = last_several_days_lows_slice_Series.iloc[
-                #             row_number_in_lows - 2]
-                #         next_daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows]
-                #
-                #         #print("last_several_days_lows_slice_Series.iloc[row_number_in_lows]=\n",
-                #         #      last_several_days_lows_slice_Series.iloc[row_number_in_lows])
-                #
-                #         # print ( "prev_daily_high\n" , prev_daily_high )
-                #         # print ( "next_daily_high\n" , next_daily_high )
-                #         # print ( "prev_daily_low\n" , prev_daily_low )
-                #         # print ( "next_daily_low\n" , next_daily_low )
-                #         if prev_daily_low > daily_low and next_daily_low > daily_low:
-                #             print ( "found legit low" )
-                #
-                #         if prev_daily_high < daily_high and next_daily_high < daily_high:
-                #             print ( "found legit high" )
-                #             if prev_daily_low > daily_low and next_daily_low > daily_low:
-                #                 print ( "level is legit\n" )
-                #
-                #                 #print ( "last_several_days_lows_slice_Series\n" ,
-                #                 #        last_several_days_lows_slice_Series )
-                #
-                #                 list_of_tuples_of_lows = list ( last_several_days_lows_slice_Series.items () )
-                #                 #print ( "list_of_tuples_of_lows\n",list_of_tuples_of_lows )
-                #                 tuple_of_legit_low_level = list_of_tuples_of_lows[row_number_in_lows - 1]
-                #                 #print ( "tuple_of_legit_low_level\n" ,
-                #                 #        tuple_of_legit_low_level )
-                #
-                #                 list_of_tuples_of_highs = list (
-                #                     last_several_days_highs_slice_Series.items () )
-                #                 #print ( "list_of_tuples_of_highs\n" , list_of_tuples_of_highs )
-                #                 tuple_of_legit_high_level = list_of_tuples_of_highs[
-                #                     row_number_in_highs - 1]
-                #                 #print ("tuple_of_legit_high_level\n", tuple_of_legit_high_level)
-                #
-                #                 # print ( "dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] )\n" ,
-                #                 #         dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] / 1000.0 ) )
-                #                 #
-                #                 # print ( "dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0] )" ,
-                #                 #         dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0] / 1000.0 ) )
-                #
-                #                 mirror_level_df.loc[0 , 'USDT_pair'] = usdt_pair
-                #                 mirror_level_df.loc[0 , 'exchange'] = exchange
-                #                 mirror_level_df.loc[0 , 'mirror_level'] = daily_low
-                #                 mirror_level_df.loc[0 , 'timestamp_for_low'] = \
-                #                     tuple_of_legit_low_level[0]
-                #                 mirror_level_df.loc[0 , 'timestamp_for_high'] = \
-                #                     tuple_of_legit_high_level[0]
-                #                 mirror_level_df.loc[0 , 'low'] = daily_low
-                #                 mirror_level_df.loc[0 , 'high'] = daily_high
-                #                 mirror_level_df.loc[0 , 'open_time_of_candle_with_legit_low'] = \
-                #                     dt.datetime.fromtimestamp ( tuple_of_legit_low_level[0] / 1000.0 )
-                #                 mirror_level_df.loc[0 , 'open_time_of_candle_with_legit_high'] = \
-                #                     dt.datetime.fromtimestamp ( tuple_of_legit_high_level[0] / 1000.0 )
-                #                 mirror_level_df.loc[0 , 'average_volume'] = average_volume
-                #
-                #                 print ( 'mirror_level_df\n' , mirror_level_df )
-                #
-                #
-                #
-                #                 mirror_level_df.to_sql ( "mirror_levels_calculated_separately" ,
-                #                                          connection_to_btc_and_usdt_trading_pairs ,
-                #                                          if_exists = 'append' , index = False )
-                #
-                # pass
         except Exception as e:
             print(f"problem with {table_in_db}", e)
             traceback.print_exc ()
@@ -660,9 +773,26 @@ def find_asc_desc_triangles_in_database(async_var):
             len(list_of_pairs_and_exchanges_with_touches_of_level_by_high) )
 
     print ( "not_recent_pair_counter=" , not_recent_pair_counter )
+    levels_formed_by_lows_df.drop_duplicates(ignore_index = True,inplace = True)
+    levels_formed_by_highs_df.drop_duplicates ( ignore_index = True , inplace = True )
+
+
+
+    print ( "levels_formed_by_lows_df" )
+    print(levels_formed_by_lows_df.to_string())
+    print ( "levels_formed_by_highs_df" )
+    print ( levels_formed_by_highs_df.to_string() )
+
+    levels_formed_by_lows_df.to_sql ( "levels_formed_by_lows" ,
+                             connection_to_btc_and_usdt_trading_pairs ,
+                             if_exists = 'replace' , index = False )
+    levels_formed_by_highs_df.to_sql ( "levels_formed_by_highs" ,
+                                      connection_to_btc_and_usdt_trading_pairs ,
+                                      if_exists = 'replace' , index = False )
 
     connection_to_usdt_trading_pairs_ohlcv.close()
     connection_to_btc_and_usdt_trading_pairs.close()
+
     end_time = time.time ()
     overall_time = end_time - start_time
     print ( 'overall time in minutes=' , overall_time / 60.0 )
