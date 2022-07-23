@@ -14,34 +14,21 @@ import plot_ohlcv_chart_with_mirror_levels_from_async_db_with_triple_table_name
 import plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows
 #import second_fetch_historical_USDT_pairs_ohlc_from_all_exchanges_with_ccxt
 import plot_ohlcv_chart_with_price_approaching_mirror_levels
-import find_asc_desc_triangles
-import plot_levels_formed_by_high
-import plot_levels_formed_by_low
-import plot_levels_formed_by_last_three_or_two_highs
-import plot_levels_formed_by_last_three_or_two_lows
-
 def main():
     start_time=time.time()
     async_var=True
     try:
-        async_fetch_historical_USDT_pairs_from_all_exchanges_with_ccxt.fetch_historical_usdt_pairs_asynchronously()
+        #async_fetch_historical_USDT_pairs_from_all_exchanges_with_ccxt.fetch_historical_usdt_pairs_asynchronously()
         find_mirror_levels_with_given_params_in_database.find_mirror_levels_in_database(async_var)
         # if async_var==False:
         #     second_fetch_historical_USDT_pairs_ohlc_from_all_exchanges_with_ccxt.find_mirror_levels_with_given_params_in_database.find_mirror_levels_in_database(async_var)
         drop_duplicates_in_db.drop_duplicates_in_db()
         find_keltner_channel.find_mirror_levels_in_database_and_add_kc_to_db(async_var)
-        find_asc_desc_triangles.find_asc_desc_triangles_in_database(async_var)
-        plot_levels_formed_by_high.plot_ohlcv_chart_with_levels_formed_by_highs(async_var)
-        plot_levels_formed_by_low.plot_ohlcv_chart_with_levels_formed_by_lows(async_var)
-
-        plot_levels_formed_by_last_three_or_two_highs.plot_ohlcv_chart_with_levels_formed_by_highs ( async_var )
-        plot_levels_formed_by_last_three_or_two_lows.plot_ohlcv_chart_with_levels_formed_by_lows ( async_var )
-
 
         plot_ohlcv_chart_with_mirror_levels_from_async_db_with_triple_table_name.plot_ohlcv_chart_with_mirror_levels_from_given_exchange() #plot charts ready for rebound
         find_if_high_or_low_yesterday_coincides_with_mirror_level.find_mirror_levels_in_database(async_var)
-        plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange(async_var)
-        plot_ohlcv_chart_with_price_approaching_mirror_levels.plot_ohlcv_chart_with_price_approaching_mirror_levels()
+        #plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange(async_var)
+        #plot_ohlcv_chart_with_price_approaching_mirror_levels.plot_ohlcv_chart_with_price_approaching_mirror_levels()
 
     except Exception as e:
         print(e)

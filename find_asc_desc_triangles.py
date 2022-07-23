@@ -237,6 +237,7 @@ def find_asc_desc_triangles_in_database(async_var):
             # print("last_n_days_from_data_df\n")
             # print ( last_n_days_from_data_df )
 
+
             count_equal_highs_dict=Counter(last_n_days_from_data_df["high"].to_list())
             count_equal_highs_df=pd.DataFrame(count_equal_highs_dict.items(),
                                               columns=["high","number_of_equal_highs"])
@@ -620,6 +621,114 @@ def find_asc_desc_triangles_in_database(async_var):
                                                     levels_formed_by_highs_df.loc[
                                                         counter_for_high_level_in_final_df - 1 , f'timestamp_{counter_for_timestamp}'] = timestamp
 
+                                                    #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+                                                    slice_of_last_two_days_from_data_df = data_df.tail ( 2 )
+                                                    slice_of_last_three_days_from_data_df = data_df.tail ( 3 )
+
+                                                    # find if last three lows or highs coincide in ohlcv
+                                                    print ( "slice_of_last_two_days_from_data_df\n" ,
+                                                            slice_of_last_two_days_from_data_df.to_string () )
+                                                    print ( "slice_of_last_three_days_from_data_df\n" ,
+                                                            slice_of_last_three_days_from_data_df.to_string () )
+
+                                                    last_three_days_list_of_lows = list (
+                                                        slice_of_last_three_days_from_data_df["low"].values )
+                                                    last_three_days_list_of_highs = list (
+                                                        slice_of_last_three_days_from_data_df["high"].values )
+
+                                                    print ( "last_three_days_list_of_highs\n" ,
+                                                            last_three_days_list_of_highs )
+                                                    print ( "last_three_days_list_of_lows\n" ,
+                                                            last_three_days_list_of_lows )
+
+                                                    print ( "set(list_of_highs)\n" ,
+                                                            set ( last_three_days_list_of_highs ) )
+                                                    print ( "set(list_of_lows)\n" ,
+                                                            set ( last_three_days_list_of_lows ) )
+                                                    set_of_last_three_lows = set ( last_three_days_list_of_lows )
+                                                    set_of_last_three_highs = set ( last_three_days_list_of_highs )
+
+                                                    if len ( last_three_days_list_of_lows ) == 3:
+
+                                                        if len ( set ( last_three_days_list_of_lows ) ) == 1:
+                                                            print ( f"for {usdt_pair} on {exchange} with "
+                                                                    f"low of {next ( iter ( set_of_last_three_lows ) )} over last three days" )
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 , "last_3_day_lows_equal"] = 1
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 ,
+                                                                "last_3_day_lows_equal_to"]=next ( iter ( set_of_last_three_lows ) )
+                                                        else:
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 , "last_3_day_lows_equal"] = 0
+
+                                                    if len ( last_three_days_list_of_highs ) == 3:
+
+                                                        if len ( set ( last_three_days_list_of_highs ) ) == 1:
+                                                            print ( f"for {usdt_pair} on {exchange} with "
+                                                                    f"high of {next ( iter ( set_of_last_three_highs ) )} over last three days" )
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 , "last_3_day_highs_equal"] = 1
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 ,
+                                                                "last_3_day_highs_equal_to"] = next (
+                                                                iter ( set_of_last_three_highs ) )
+                                                        else:
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 , "last_3_day_highs_equal"] = 0
+
+                                                    # find if last two lows or highs coincide in ohlcv
+                                                    print ( "slice_of_last_two_days_from_data_df\n" ,
+                                                            slice_of_last_two_days_from_data_df.to_string () )
+
+                                                    last_two_days_list_of_lows = list (
+                                                        slice_of_last_two_days_from_data_df["low"].values )
+                                                    last_two_days_list_of_highs = list (
+                                                        slice_of_last_two_days_from_data_df["high"].values )
+
+                                                    print ( "last_two_days_list_of_highs\n" ,
+                                                            last_two_days_list_of_highs )
+                                                    print ( "last_two_days_list_of_lows\n" ,
+                                                            last_two_days_list_of_lows )
+
+                                                    print ( "set(list_of_highs)\n" ,
+                                                            set ( last_two_days_list_of_highs ) )
+                                                    print ( "set(list_of_lows)\n" , set ( last_two_days_list_of_lows ) )
+                                                    set_of_last_two_lows = set ( last_two_days_list_of_lows )
+                                                    set_of_last_two_highs = set ( last_two_days_list_of_highs )
+
+                                                    if len ( last_two_days_list_of_lows ) == 2:
+
+                                                        if len ( set ( last_two_days_list_of_lows ) ) == 1:
+                                                            print ( f"for {usdt_pair} on {exchange} with "
+                                                                    f"low of {next ( iter ( set_of_last_two_lows ) )} over last two days" )
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 , "last_2_day_lows_equal"] = 1
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 ,
+                                                                "last_2_day_lows_equal_to"] = next (
+                                                                iter ( set_of_last_two_lows ) )
+                                                        else:
+                                                            levels_formed_by_lows_df.loc[
+                                                                counter_for_low_level_in_final_df - 1 , "last_2_day_lows_equal"] = 0
+
+                                                    if len ( last_two_days_list_of_highs ) == 2:
+
+                                                        if len ( set ( last_two_days_list_of_highs ) ) == 1:
+                                                            print ( f"for {usdt_pair} on {exchange} with "
+                                                                    f"high of {next ( iter ( set_of_last_two_highs ) )} over last two days" )
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 ,
+                                                                "last_2_day_highs_equal"] = 1
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 ,
+                                                                "last_2_day_highs_equal_to"] = next (
+                                                                iter ( set_of_last_two_highs ) )
+                                                        else:
+                                                            levels_formed_by_highs_df.loc[
+                                                                counter_for_high_level_in_final_df - 1 , "last_2_day_highs_equal"] = 0
+
                                     #####################++++++++++++++++++++----------++++++++++++++++++++++++#
 
 
@@ -773,8 +882,12 @@ def find_asc_desc_triangles_in_database(async_var):
             len(list_of_pairs_and_exchanges_with_touches_of_level_by_high) )
 
     print ( "not_recent_pair_counter=" , not_recent_pair_counter )
-    levels_formed_by_lows_df.drop_duplicates(ignore_index = True,inplace = True)
-    levels_formed_by_highs_df.drop_duplicates ( ignore_index = True , inplace = True )
+    levels_formed_by_lows_df.drop_duplicates(subset=
+                                             ["USDT_pair","exchange","level_formed_by_low"],
+                                             ignore_index = True,inplace = True,keep="last")
+    levels_formed_by_highs_df.drop_duplicates ( subset=
+                                                ["USDT_pair","exchange","level_formed_by_high"],
+                                                ignore_index = True , inplace = True,keep="last" )
 
 
 

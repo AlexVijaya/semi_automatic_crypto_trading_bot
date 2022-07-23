@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 pandas = "*"
-ccxt = "*"
+ccxt = "==1.90.88"
 numpy = "*"
 talib-bin = "*"
 ta = "*"
