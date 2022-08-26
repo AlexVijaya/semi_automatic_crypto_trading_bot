@@ -19,7 +19,7 @@ import plot_levels_formed_by_high
 import plot_levels_formed_by_low
 import plot_levels_formed_by_last_three_or_two_highs
 import plot_levels_formed_by_last_three_or_two_lows
-
+import find_if_asset_is_approaching_mirror_level_percentage_wise
 def main():
     start_time=time.time()
     async_var=True
@@ -41,6 +41,7 @@ def main():
         plot_ohlcv_chart_with_mirror_levels_from_async_db_with_triple_table_name.plot_ohlcv_chart_with_mirror_levels_from_given_exchange() #plot charts ready for rebound
         find_if_high_or_low_yesterday_coincides_with_mirror_level.find_mirror_levels_in_database(async_var)
         plot_ohlcv_chart_with_mirror_levels_from_given_exchange_with_recent_highs_and_lows.plot_ohlcv_chart_with_mirror_levels_from_given_exchange(async_var)
+        find_if_asset_is_approaching_mirror_level_percentage_wise.find_if_asset_is_approaching_mirror_level_percentage_wise(async_var)
         plot_ohlcv_chart_with_price_approaching_mirror_levels.plot_ohlcv_chart_with_price_approaching_mirror_levels()
 
     except Exception as e:

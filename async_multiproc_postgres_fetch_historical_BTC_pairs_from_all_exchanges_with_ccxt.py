@@ -13,6 +13,7 @@ import ccxt.async_support as ccxt  # noqa: E402
 from pathlib import Path
 import multiprocessing
 from multiprocessing.pool import Pool
+import psycopg2
 
 from multiprocessing import Process
 # async def get_hisorical_data_from_exchange_for_one_symbol(exchange_object, usdt_pair):
@@ -229,28 +230,57 @@ def fetch_historical_btc_pairs_asynchronously(exchanges_list):
     #exchanges_list=ccxt.exchanges
     global new_counter
 
-    path_to_async_ohlcv_db=os.path.join ( os.getcwd () ,
-                                         "datasets" ,
-                                         "sql_databases" ,"async_databases",
-                                         "async_multiproc_all_exchanges_multiple_tables_historical_data_for_btc_trading_pairs.db" )
+    # path_to_async_ohlcv_db=os.path.join ( os.getcwd () ,
+    #                                      "datasets" ,
+    #                                      "sql_databases" ,"async_databases",
+    #                                      "async_multiproc_postgres_multiple_tables_historical_data_for_btc_trading_pairs.db" )
+    #
+    # path_to_async_ohlcv_db_dir = os.path.join ( os.getcwd () ,
+    #                                         "datasets" ,
+    #                                         "sql_databases","async_databases"  )
+    #
+    # Path ( path_to_async_ohlcv_db_dir ).mkdir ( parents = True , exist_ok = True )
+    #
+    # if os.path.exists ( path_to_async_ohlcv_db ):
+    #     os.remove ( path_to_async_ohlcv_db )
+    #
+    #
+    # print ( "before removal of db" )
+    # # time.sleep(20)
+    # print ( "after removal of db" )
+    # #create_empty_database ( path_to_async_ohlcv_db )
+    #
+    # connection_to_btc_trading_pairs_daily_ohlcv = \
+    #     sqlite3.connect ( path_to_async_ohlcv_db)
 
-    path_to_async_ohlcv_db_dir = os.path.join ( os.getcwd () ,
-                                            "datasets" ,
-                                            "sql_databases","async_databases"  )
+    connection_to_btc_trading_pairs_daily_ohlcv = psycopg2.connect (
+        database = "postgres" ,
+        user = 'vijaya_postgres_user' ,
+        password = 'vijaya_passcode' ,
+        host = '127.0.0.1' ,
+        port = '5432'
+    )
 
-    Path ( path_to_async_ohlcv_db_dir ).mkdir ( parents = True , exist_ok = True )
+    connection_to_btc_trading_pairs_daily_ohlcv.autocommit = True
+    # Creating a cursor object using the cursor() method
 
-    if os.path.exists ( path_to_async_ohlcv_db ):
-        os.remove ( path_to_async_ohlcv_db )
+    cursor = connection_to_btc_trading_pairs_daily_ohlcv.cursor ()
+    try:
+        cursor.execute ( "drop database async_multiproc_postgres_ohlcv_data_for_btc_trading_pairs;" )
+    except Exception as e:
+        print ( e )
 
+    try:
+        cursor.execute ( "create database async_multiproc_postgres_ohlcv_data_for_btc_trading_pairs;" )
+    except Exception as e:
+        print ( e )
 
-    print ( "before removal of db" )
-    # time.sleep(20)
-    print ( "after removal of db" )
-    #create_empty_database ( path_to_async_ohlcv_db )
+    print ( "database connection established" )
+    cursor.execute ( "select version()" )
 
-    connection_to_btc_trading_pairs_daily_ohlcv = \
-        sqlite3.connect ( path_to_async_ohlcv_db)
+    # Fetch a single row using fetchone() method.
+    data = cursor.fetchone ()
+    print ( "Connection established to: " , data )
 
     # connection_to_btc_trading_pairs_4h_ohlcv = \
     #     sqlite3.connect ( os.path.join ( os.getcwd () ,
@@ -309,7 +339,7 @@ if __name__=="__main__":
         # for process in process_list:
         #     process.join ()
 
-        pool=Pool(processes = 100)
+        pool=Pool(processes = 10)
         # with pool:
         #     for number_of_exchange , exchange in enumerate ( list_of_all_exchanges[0:10] ):
         #         pool.starmap(fetch_historical_btc_pairs_asynchronously,[(list_of_all_exchanges[0:10],number_of_exchange)])

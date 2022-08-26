@@ -81,7 +81,7 @@ def check_if_current_bar_closed_within_acceptable_range_to_yesterdays_mirror_lev
                 data =exchange_object.fetch_ohlcv ( usdt_trading_pair , '1d' )
                 header = ['Timestamp' , 'open' , 'high' , 'low' , 'close' , 'volume']
                 data_df = pd.DataFrame ( data , columns = header ).set_index ( 'Timestamp' )
-                print("data_df\n",data_df)
+
                 last_price=data_df.iloc[-1]["close"]
 
                 penultimate_high = data_df.iloc[-2]["high"]

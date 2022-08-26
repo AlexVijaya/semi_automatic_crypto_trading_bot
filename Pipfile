@@ -15,6 +15,15 @@ imgkit = "*"
 pdfkit = "*"
 aiohttp = "*"
 aiofiles = "*"
+psycopg2-binary = "*"
+sqlalchemy = "*"
+sqlalchemy-utils = "*"
+asyncpg = "*"
+selenium = "*"
+bs4 = "*"
+charset-normalizer = "*"
+lxml = "*"
+webdriver-manager = "*"
 
 [dev-packages]
 
