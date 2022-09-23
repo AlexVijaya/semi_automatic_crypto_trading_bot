@@ -54,3 +54,5 @@ def extract_list_of_stablecoins_from_coingecko():
 
 if __name__=='__main__':
     extract_list_of_stablecoins_from_coingecko()
+
+

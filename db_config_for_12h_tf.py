@@ -1,0 +1,9 @@
+database = "ohlcv_data_for_USDT_pairs_for_12h_and_lower_tf"
+user = 'vijaya_postgres_user'
+password = 'vijaya_passcode'
+#host = 'localhost' ,
+host = '127.0.0.1'
+port = '5432'
+driver='psycopg2'
+dialect='postgresql'
+dummy_database='postgres'

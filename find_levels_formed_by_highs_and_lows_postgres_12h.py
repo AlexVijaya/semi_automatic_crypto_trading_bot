@@ -19,7 +19,7 @@ from sqlalchemy.engine.url import URL
 from sqlalchemy.ext.declarative import declarative_base
 
 
-def connect_to_postres_db(database = "btc_and_usdt_pairs_from_all_exchanges"):
+def connect_to_postres_db(database = "btc_and_usdt_pairs_from_all_exchanges_12h"):
     dialect = db_config.dialect
     driver = db_config.driver
     password = db_config.password
@@ -63,13 +63,13 @@ def drop_table(table_name,engine):
     #    base.metadata.drop_all(engine, [table], checkfirst=True)
 
 
-def find_levels_formed_by_highs_and_lows():
+def find_levels_formed_by_highs_and_lows(so_many_last_days_for_level_calculation = 30):
     start_time = time.time ()
     counter_for_tables = 0
 
 
     engine_for_usdt_trading_pairs_ohlcv_db, connection_to_usdt_trading_pairs_ohlcv =\
-        connect_to_postres_db("async_ohlcv_data_for_usdt_trading_pairs")
+        connect_to_postres_db("ohlcv_data_for_usdt_pairs_for_12h_and_lower_tf")
 
     inspector = inspect ( engine_for_usdt_trading_pairs_ohlcv_db )
     # print(metadata.reflect(engine_for_usdt_trading_pairs_ohlcv_db))
@@ -81,7 +81,7 @@ def find_levels_formed_by_highs_and_lows():
     list_of_tables = []
     # open_connection to database with mirror levels
     engine_for_btc_and_usdt_trading_pairs_db , connection_to_btc_and_usdt_trading_pairs = \
-        connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges" )
+        connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges_12h" )
 
     counter_for_usdt_pair_with_low = 0
     counter_for_usdt_pair_with_high = 0
@@ -232,7 +232,7 @@ def find_levels_formed_by_highs_and_lows():
             # print("data_df\n", data_df)
             #
 
-            so_many_last_days_for_level_calculation = 30
+
             so_many_number_of_touches_of_level_by_highs=2
             so_many_number_of_touches_of_level_by_lows = 2
 
@@ -514,7 +514,7 @@ def find_levels_formed_by_highs_and_lows():
                                                     levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,f'timestamp_{counter_for_timestamp}'] = timestamp
 
                                                     print ( "levels_formed_by_lows_df" )
-                                                    print ( levels_formed_by_lows_df.to_string() )
+                                                    print ( levels_formed_by_lows_df )
 
 
                                     #####################++++++++++++++++++++----------++++++++++++++++++++++++#
@@ -923,4 +923,5 @@ def find_levels_formed_by_highs_and_lows():
     print ( 'start_time=' , start_time )
     print ( 'end_time=' , end_time )
 if __name__=="__main__":
-    find_levels_formed_by_highs_and_lows()
+    so_many_last_days_for_level_calculation = 30
+    find_levels_formed_by_highs_and_lows(so_many_last_days_for_level_calculation)

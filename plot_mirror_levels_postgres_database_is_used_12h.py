@@ -25,7 +25,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy_utils import create_database,database_exists
 
 
-def connect_to_postres_db(database = "btc_and_usdt_pairs_from_all_exchanges"):
+def connect_to_postres_db(database = "btc_and_usdt_pairs_from_all_exchanges_12h"):
     dialect = db_config.dialect
     driver = db_config.driver
     password = db_config.password
@@ -98,7 +98,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     start_time=time.time()
 
     engine_for_usdt_trading_pairs_ohlcv_db , connection_to_usdt_trading_pairs_ohlcv = \
-        connect_to_postres_db ( "async_ohlcv_data_for_usdt_trading_pairs" )
+        connect_to_postres_db ( "ohlcv_data_for_usdt_pairs_for_12h_and_lower_tf" )
 
     # path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
     #                                                     "sql_databases" ,
@@ -108,7 +108,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     #     sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
 
     engine_for_btc_and_usdt_trading_pairs_levels_formed_by_high_db , connection_to_btc_and_usdt_trading_pairs = \
-        connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges" )
+        connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges_12h" )
 
 
     mirror_levels_df = pd.read_sql ( f'''select * from mirror_levels_without_duplicates ;''' ,
@@ -119,7 +119,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     folder_to_be_deleted = os.path.join ( os.getcwd () ,
                                           'datasets' ,
                                           'plots' ,
-                                          'crypto_exchange_mirror_levels_plots' )
+                                          'crypto_exchange_mirror_levels_plots_12h' )
 
     try:
         shutil.rmtree ( folder_to_be_deleted )
@@ -266,33 +266,33 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                 where_to_plot_html = os.path.join ( os.getcwd () ,
                                                'datasets' ,
                                                'plots' ,
-                                               'crypto_exchange_mirror_levels_plots' ,
+                                               'crypto_exchange_mirror_levels_plots_12h' ,
                                                'crypto_exchange_plots_html',
                                                f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.html')
 
                 where_to_plot_pdf = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_12h' ,
                                                    'crypto_exchange_plots_pdf',
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}.pdf' )
                 where_to_plot_svg = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_12h' ,
                                                    'crypto_exchange_plots_svg' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.svg' )
                 where_to_plot_jpg = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_12h' ,
                                                    'crypto_exchange_plots_jpg' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.jpg' )
 
                 where_to_plot_png = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_12h' ,
                                                    'crypto_exchange_plots_png' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.png' )
                 #create directory for crypto_exchange_plots parent folder
@@ -300,7 +300,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                 path_to_databases = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' )
+                                                   'crypto_exchange_mirror_levels_plots_12h' )
                 Path ( path_to_databases ).mkdir ( parents = True , exist_ok = True )
                 #create directories for all hh images
                 formats=['png','svg','pdf','html','jpg']
@@ -309,7 +309,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                         os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'crypto_exchange_mirror_levels_plots',
+                                                       'crypto_exchange_mirror_levels_plots_12h',
                                                        f'crypto_exchange_plots_{img_format}')
                     Path ( path_to_special_format_images_of_mirror_charts ).\
                         mkdir ( parents = True , exist_ok = True )

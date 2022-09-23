@@ -70,7 +70,13 @@ def find_mirror_levels_in_database():
 
     engine_for_usdt_trading_pairs_ohlcv_db, connection_to_usdt_trading_pairs_ohlcv =\
         connect_to_postres_db("async_ohlcv_data_for_usdt_trading_pairs")
+    ###############################################33
+    ###############################################
 
+    lower_timeframe_for_mirror_level_rebound_trading='1h'
+
+    #############################################
+    #############################################
 
     list_of_tables_from_sql_query=engine_for_usdt_trading_pairs_ohlcv_db.execute ( '''SELECT table_name
                                                         FROM information_schema.tables
@@ -174,8 +180,8 @@ def find_mirror_levels_in_database():
 
             for row_number_in_highs in range ( last_several_days_highs_slice_Series.size ):
                 for row_number_in_lows in range ( last_several_days_lows_slice_Series.size ):
-                    daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs - 1]
-                    daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows - 1]
+                    daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs ]
+                    daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows ]
                     if daily_high == daily_low:
                         # print ( "daily_low\n" ,
                         #         daily_low )
@@ -249,9 +255,18 @@ def find_mirror_levels_in_database():
 
 
 
+
+
                                         mirror_level_df.to_sql ( "mirror_levels_calculated_separately" ,
                                                                  connection_to_btc_and_usdt_trading_pairs ,
                                                                  if_exists = 'append' , index = False )
+
+                                        # timestamp_for_low=tuple_of_legit_low_level[0]
+                                        # timestamp_for_high = tuple_of_legit_high_level[0]
+                                        # mirror_level=daily_low
+
+
+
 
                         pass
         except Exception as e:

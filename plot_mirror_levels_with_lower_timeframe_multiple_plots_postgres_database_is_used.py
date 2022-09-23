@@ -91,6 +91,79 @@ def import_some_period_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair,
     connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_some_period_timeframe.close()
     return historical_some_period_data_for_usdt_trading_pair_df
 
+def import_lower_period_ohlcv_and_mirror_levels_for_plotting(usdt_trading_pair,
+                                                             exchange,
+                                                             mirror_level,
+                                                             connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe,
+                                                             lower_timeframe_for_mirror_level_rebound_trading='1h'):
+
+
+    historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df=pd.DataFrame()
+    historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df=pd.DataFrame()
+    max_counter_in_lower_timeframe_table=None
+    try:
+        max_counter_in_lower_timeframe_table = \
+            pd.read_sql (
+                f'''select max(counter) from "{usdt_trading_pair}_on_{exchange}_at_{mirror_level}";''' ,
+                connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe )
+
+        max_counter_in_lower_timeframe_table=int(max_counter_in_lower_timeframe_table.iat[0,0])
+        print ( "type(max_counter_in_lower_timeframe_table)" )
+        print ( type ( max_counter_in_lower_timeframe_table ) )
+    except:
+        traceback.print_exc()
+
+    try:
+        historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df=\
+            pd.read_sql ( f'''select * from "{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" where is_low={True};'''  ,
+                                 connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe )
+        list_of_available_timeframes_from_column_in_pd_df=list(historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df["timeframe"])
+        list_of_available_timeframes_from_column_in_pd_df=\
+            list(set(list_of_available_timeframes_from_column_in_pd_df))
+        print("list_of_available_timeframes_from_column_in_pd_df")
+        print(list_of_available_timeframes_from_column_in_pd_df)
+        if lower_timeframe_for_mirror_level_rebound_trading in list_of_available_timeframes_from_column_in_pd_df:
+            print ( "type ( lower_timeframe_for_mirror_level_rebound_trading )" )
+            print ( type ( lower_timeframe_for_mirror_level_rebound_trading ) )
+            print(lower_timeframe_for_mirror_level_rebound_trading)
+            print(list_of_available_timeframes_from_column_in_pd_df)
+            historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df= \
+                historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df.loc[historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df["timeframe"]==f"{lower_timeframe_for_mirror_level_rebound_trading}"]
+
+
+    except:
+        traceback.print_exc()
+
+    try:
+        historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df = \
+            pd.read_sql ( f'''select * from "{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" where is_high={True};''' ,
+                          connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe )
+
+        list_of_available_timeframes_from_column_in_pd_df = list (
+            historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df["timeframe"] )
+        list_of_available_timeframes_from_column_in_pd_df = \
+            list ( set ( list_of_available_timeframes_from_column_in_pd_df ) )
+        print ( "list_of_available_timeframes_from_column_in_pd_df" )
+        print ( list_of_available_timeframes_from_column_in_pd_df )
+        if lower_timeframe_for_mirror_level_rebound_trading in list_of_available_timeframes_from_column_in_pd_df:
+            print ( "type ( lower_timeframe_for_mirror_level_rebound_trading )" )
+            print(type(lower_timeframe_for_mirror_level_rebound_trading))
+            print ( lower_timeframe_for_mirror_level_rebound_trading )
+            print ( list_of_available_timeframes_from_column_in_pd_df )
+            historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df = \
+                historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df.loc[
+                    historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df["timeframe"] == f"{lower_timeframe_for_mirror_level_rebound_trading}"]
+
+    except:
+        traceback.print_exc()
+
+    #connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe.close()
+    return historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df,\
+           historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df, \
+           max_counter_in_lower_timeframe_table
+
+
+
 
 
 
@@ -110,6 +183,11 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     engine_for_btc_and_usdt_trading_pairs_levels_formed_by_high_db , connection_to_btc_and_usdt_trading_pairs = \
         connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges" )
 
+    engine_for_usdt_trading_pairs_ohlcv_ready_for_rebound_db_lower_period_timeframe , \
+    connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe = \
+        connect_to_postres_db (
+            f"ohlcv_with_lower_timeframes_tables_for_each_mirror_level" )
+
 
     mirror_levels_df = pd.read_sql ( f'''select * from mirror_levels_without_duplicates ;''' ,
                                          connection_to_btc_and_usdt_trading_pairs )
@@ -119,7 +197,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     folder_to_be_deleted = os.path.join ( os.getcwd () ,
                                           'datasets' ,
                                           'plots' ,
-                                          'crypto_exchange_mirror_levels_plots' )
+                                          'crypto_exchange_mirror_levels_plots_with_lower_time_frames' )
 
     try:
         shutil.rmtree ( folder_to_be_deleted )
@@ -127,6 +205,15 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
     except Exception as e:
         print ( "error deleting folder \n" , e )
         pass
+
+    list_of_all_lower_timeframe_tables = []
+    list_of_all_tables_in_lower_timeframe_database = engine_for_usdt_trading_pairs_ohlcv_ready_for_rebound_db_lower_period_timeframe. \
+        execute ( "SELECT table_name FROM information_schema.tables WHERE table_schema='public'" )
+    list_of_tuples_all_tables_in_lower_timeframe_database = list ( list_of_all_tables_in_lower_timeframe_database )
+    for tuple_with_table_name in list_of_tuples_all_tables_in_lower_timeframe_database:
+        list_of_all_lower_timeframe_tables.append ( tuple_with_table_name[0] )
+
+
 
     for row_number in range(0,len(mirror_levels_df)):
         usdt_trading_pair =mirror_levels_df.loc[row_number,'USDT_pair']
@@ -138,6 +225,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
         timestamp_for_low = (mirror_levels_df.loc[row_number , 'timestamp_for_low']) / 1000.0
         timestamp_for_high = (mirror_levels_df.loc[row_number , 'timestamp_for_high']) / 1000.0
 
+        list_of_lower_timeframes=['1h','4h','6h','8h','12h']
+
 
 
         try:
@@ -146,6 +235,37 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                                                 'open_time_of_candle_with_legit_low']
             open_time_of_candle_with_legit_high = mirror_levels_df.loc[row_number ,
                                                 'open_time_of_candle_with_legit_high']
+
+            max_counter_in_lower_timeframe_table=0
+
+            for lower_timeframe_for_mirror_level_rebound_trading in list_of_lower_timeframes:
+
+                try:
+                    if f"{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" in list_of_all_lower_timeframe_tables:
+                        historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df , \
+                        historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df , \
+                        max_counter_in_lower_timeframe_table = \
+                            import_lower_period_ohlcv_and_mirror_levels_for_plotting ( usdt_trading_pair ,
+                                                                                       exchange ,
+                                                                                       mirror_level ,
+                                                                                       connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe ,
+                                                                                       lower_timeframe_for_mirror_level_rebound_trading
+                                                                                       )
+
+                        print ( "-" * 80 )
+                        print ( "max_counter_in_lower_timeframe_table" )
+                        print ( max_counter_in_lower_timeframe_table )
+
+                        print ( "historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df" )
+                        print ( historical_lower_period_data_for_low_in_mirror_level_usdt_trading_pair_df )
+                        print ( "-" * 80 )
+                        print ( "historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df" )
+                        print ( historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df )
+
+                except:
+                    pass
+                finally:
+                    continue
 
             # open_time_of_candle_with_legit_high = datetime.strptime ( open_time_of_candle_with_legit_high_str ,
             #                                                           '%Y-%m-%d %H:%M:%S' )
@@ -160,6 +280,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
             # open_time_of_candle_with_legit_low=datetime.strptime ( open_time_of_candle_with_legit_low ,
             #                                                           '%d-%m-%Y %H:%M:%S' )
             #print (type(open_time_of_candle_with_legit_high))
+
+
             historical_data_for_usdt_trading_pair_df=\
                 import_ohlcv_and_mirror_levels_for_plotting ( usdt_trading_pair,
                                                 exchange,
@@ -169,6 +291,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                   f'out of {len(mirror_levels_df)}')
             print ( "historical_data_for_usdt_trading_pair_df\n" ,
                    historical_data_for_usdt_trading_pair_df )
+
+            print("plot_number=",plot_number)
 
             usdt_trading_pair_without_slash=usdt_trading_pair.replace("/","")
 
@@ -258,7 +382,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
             print ( "historical_data_for_usdt_trading_pair_df\n" ,
                     historical_data_for_usdt_trading_pair_df )
 
-            number_of_charts = 2
+            number_of_charts = 2+max_counter_in_lower_timeframe_table
+
             how_many_last_rows_to_plot=0
 
             #plotting charts with mirror levels
@@ -266,33 +391,33 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                 where_to_plot_html = os.path.join ( os.getcwd () ,
                                                'datasets' ,
                                                'plots' ,
-                                               'crypto_exchange_mirror_levels_plots' ,
+                                               'crypto_exchange_mirror_levels_plots_with_lower_time_frames' ,
                                                'crypto_exchange_plots_html',
                                                f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.html')
 
                 where_to_plot_pdf = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_with_lower_time_frames' ,
                                                    'crypto_exchange_plots_pdf',
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}.pdf' )
                 where_to_plot_svg = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_with_lower_time_frames' ,
                                                    'crypto_exchange_plots_svg' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.svg' )
                 where_to_plot_jpg = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_with_lower_time_frames' ,
                                                    'crypto_exchange_plots_jpg' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.jpg' )
 
                 where_to_plot_png = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' ,
+                                                   'crypto_exchange_mirror_levels_plots_with_lower_time_frames' ,
                                                    'crypto_exchange_plots_png' ,
                                                    f'{plot_number}_{usdt_trading_pair_without_slash}_on_{exchange}.png' )
                 #create directory for crypto_exchange_plots parent folder
@@ -300,7 +425,7 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                 path_to_databases = os.path.join ( os.getcwd () ,
                                                    'datasets' ,
                                                    'plots' ,
-                                                   'crypto_exchange_mirror_levels_plots' )
+                                                   'crypto_exchange_mirror_levels_plots_with_lower_time_frames' )
                 Path ( path_to_databases ).mkdir ( parents = True , exist_ok = True )
                 #create directories for all hh images
                 formats=['png','svg','pdf','html','jpg']
@@ -309,30 +434,73 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                         os.path.join ( os.getcwd () ,
                                                        'datasets' ,
                                                        'plots' ,
-                                                       'crypto_exchange_mirror_levels_plots',
+                                                       'crypto_exchange_mirror_levels_plots_with_lower_time_frames',
                                                        f'crypto_exchange_plots_{img_format}')
                     Path ( path_to_special_format_images_of_mirror_charts ).\
                         mkdir ( parents = True , exist_ok = True )
 
-                fig = make_subplots ( rows = number_of_charts , cols = 1 ,
-                                      shared_xaxes = False ,
-                                      subplot_titles =  ( '1d',
-                                                          '1d'),
-                                           vertical_spacing = 0.05 )
-                fig.update_layout ( height = 1500 * number_of_charts,
-                                    width = 4000  ,margin = {'t': 300},
+                subplot_title_list=['1d','1d_in_greater_detail']
+
+                for additional_chart_number in range ( 1 , max_counter_in_lower_timeframe_table + 1 ):
+                    print ( "additional_chart_number" )
+                    print ( additional_chart_number )
+                    try:
+                        historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df = \
+                            pd.read_sql (
+                                f'''select * from "{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" where counter={additional_chart_number};''' ,
+                                connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe )
+                        first_part_of_subplot_title_bool=historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df["is_low"].iat[0]
+                        second_part_of_subplot_title = \
+                        historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df["timeframe"].iat[0]
+                        first_part_of_subplot_title=""
+                        if first_part_of_subplot_title_bool==True:
+                            first_part_of_subplot_title="low"
+                        else:
+                            first_part_of_subplot_title = "high"
+                        subplot_title=first_part_of_subplot_title+"_on_"+second_part_of_subplot_title+"_timeframe"
+                        print("subplot_title")
+                        print(subplot_title)
+                        subplot_title_list.append(subplot_title)
+
+                    except Exception as e:
+                        print('error', e)
+
+                if number_of_charts <=2:
+
+                    fig = make_subplots ( rows = number_of_charts , cols = 1 ,
+                                          shared_xaxes = False ,
+                                          subplot_titles =   subplot_title_list  ,
+                                               vertical_spacing = 0.05 )
+                    fig.update_layout ( height = 1700 * number_of_charts,
+                                        width = 4000  ,margin = {'t': 300},
 
 
-                                    title_text = f'{usdt_trading_pair} '
-                                                 f'on {exchange} with mirror level={mirror_level}' ,
-                                    font = dict (
-                                        family = "Courier New, monospace" ,
-                                        size = 60 ,
-                                        color = "RebeccaPurple"
-                                    ) )
+                                        title_text = f'{usdt_trading_pair} '
+                                                     f'on {exchange} with mirror level={mirror_level}' ,
+                                        font = dict (
+                                            family = "Courier New, monospace" ,
+                                            size = 60 ,
+                                            color = "RebeccaPurple"
+                                        ) )
+                else:
+                    fig = make_subplots ( rows = number_of_charts , cols = 1 ,
+                                          shared_xaxes = False ,
+                                          subplot_titles = subplot_title_list ,
+                                          vertical_spacing = 0.02 )
+                    fig.update_layout ( height = 1700 * number_of_charts ,
+                                        width = 4000 , margin = {'t': 200} ,
+
+                                        title_text = f'{usdt_trading_pair} '
+                                                     f'on {exchange} with mirror level={mirror_level}' ,
+                                        font = dict (
+                                            family = "Courier New, monospace" ,
+                                            size = 60 ,
+                                            color = "RebeccaPurple"
+                                        ) )
+
                 fig.update_xaxes ( rangeslider = {'visible': False} , row = 1 , col = 1 )
                 fig.update_xaxes ( rangeslider = {'visible': False} , row = 2 , col = 1 )
-                #fig.update_xaxes ( rangeslider = {'visible': False} , row = 3 , col = 1 )
+
                 config = dict ( {'scrollZoom': True} )
                 # print(type("historical_data_for_usdt_trading_pair_df['open_time']\n",
                 #            historical_data_for_usdt_trading_pair_df.loc[3,'open_time']))
@@ -390,6 +558,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                                                          ) , row = 2 , col = 1 , secondary_y = False )
                     except:
                         pass
+
+
 
                     try:
                         if len(open_time_of_another_high_list)>0:
@@ -507,13 +677,65 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
                     except Exception as e:
                         print('cannot plot psar', e)
 
+
+                    ############################################
+                    ############################################
+
+                    for additional_chart_number in range(1,max_counter_in_lower_timeframe_table+1):
+                        print("additional_chart_number")
+                        print ( additional_chart_number )
+                        try:
+                            historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df = \
+                                pd.read_sql (
+                                    f'''select * from "{usdt_trading_pair}_on_{exchange}_at_{mirror_level}" where counter={additional_chart_number};''' ,
+                                    connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe )
+                            fig.add_trace ( go.Candlestick ( name = f'{usdt_trading_pair} on {exchange}' ,
+                                                             x = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['open_time'] ,
+                                                             open = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['open'] ,
+                                                             high = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['high'] ,
+                                                             low = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['low'] ,
+                                                             close = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['close'] ,
+                                                             increasing_line_color = 'green' ,
+                                                             decreasing_line_color = 'red'
+                                                             ) , row = additional_chart_number+2 , col = 1 , secondary_y = False )
+
+                            fig.add_hline ( y = mirror_level )
+
+                            fig.update_xaxes ( rangeslider = {'visible': False} ,
+                                               row = additional_chart_number + 2 , col = 1 )
+
+                            if historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df[
+                                'is_low'].iat[0]==True:
+                                fig.add_scatter ( x = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['open_time_for_low'] ,
+                                                  y = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df['mirror_level'] ,
+                                                  mode = "markers" ,
+                                                  marker = dict ( color = 'red' , size = 15 ) ,
+                                                  name = "low of mirror level" , row = additional_chart_number+2 , col = 1 )
+                            if historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df[
+                                'is_high'].iat[0] == True:
+                                fig.add_scatter (
+                                    x = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df[
+                                        'open_time_for_high'] ,
+                                    y = historical_lower_period_data_for_high_in_mirror_level_usdt_trading_pair_df[
+                                        'mirror_level'] ,
+                                    mode = "markers" ,
+                                    marker = dict ( color = 'green' , size = 15 ) ,
+                                    name = "low of mirror level" , row = additional_chart_number + 2 , col = 1 )
+
+
+
+
+
+                        except:
+                            traceback.print_exc()
+
                     #fig.update_xaxes ( patch = dict ( type = 'category' ) , row = 1 , col = 1 )
 
                     # fig.update_layout ( height = 700  , width = 20000 * i, title_text = 'Charts of some crypto assets' )
                     fig.update_layout ( margin_autoexpand = True )
                     # fig['layout'][f'xaxis{0}']['title'] = 'dates for ' + symbol
-                    fig.layout.annotations[0].update ( text = '1d',align='right' )
-                    fig.layout.annotations[1].update ( text = '1d' , align = 'right' )
+                    # fig.layout.annotations[0].update ( text = '1d',align='right' )
+                    # fig.layout.annotations[1].update ( text = '1d' , align = 'right' )
                     fig.update_annotations ( font = dict ( family = "Helvetica" , size = 60 ) )
                     fig.update_layout ( showlegend = False )
                     fig.print_grid ()
@@ -551,6 +773,8 @@ def plot_ohlcv_chart_with_mirror_levels_from_given_exchange (lower_timeframe_for
             print(f"problem plotting {usdt_trading_pair} on {exchange}")
             traceback.print_exc ()
             continue
+
+    connection_to_usdt_trading_pairs_ohlcv_ready_for_rebound_lower_period_timeframe.close()
 
 
     end_time = time.time ()

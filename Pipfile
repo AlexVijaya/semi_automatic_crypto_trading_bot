@@ -24,6 +24,9 @@ bs4 = "*"
 charset-normalizer = "*"
 lxml = "*"
 webdriver-manager = "*"
+quandl = "*"
+pillow = "*"
+pypdf2 = "*"
 
 [dev-packages]
 

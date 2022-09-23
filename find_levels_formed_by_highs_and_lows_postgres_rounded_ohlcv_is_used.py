@@ -69,14 +69,14 @@ def find_levels_formed_by_highs_and_lows():
 
 
     engine_for_usdt_trading_pairs_ohlcv_db, connection_to_usdt_trading_pairs_ohlcv =\
-        connect_to_postres_db("async_ohlcv_data_for_usdt_trading_pairs")
+        connect_to_postres_db("async_rounded_ohlcv_data_for_usdt_trading_pairs")
 
     inspector = inspect ( engine_for_usdt_trading_pairs_ohlcv_db )
     # print(metadata.reflect(engine_for_usdt_trading_pairs_ohlcv_db))
     # print(inspector.get_table_names())
     list_of_tables_from_sql_query = inspector.get_table_names ()
-    print ( "list_of_tables_from_sql_query\n" )
-    print ( list_of_tables_from_sql_query )
+    # print ( "list_of_tables_from_sql_query\n" )
+    # print ( list_of_tables_from_sql_query )
 
     list_of_tables = []
     # open_connection to database with mirror levels
@@ -87,7 +87,7 @@ def find_levels_formed_by_highs_and_lows():
     counter_for_usdt_pair_with_high = 0
 
     try:
-        drop_table ( "levels_formed_by_lows" ,
+        drop_table ( "rounded_levels_formed_by_lows" ,
                      engine_for_btc_and_usdt_trading_pairs_db )
         print ( "\ntable dropped\n" )
         # time.sleep ( 1000 )
@@ -97,7 +97,7 @@ def find_levels_formed_by_highs_and_lows():
 
 
     try:
-        drop_table ( "levels_formed_by_highs" ,
+        drop_table ( "rounded_levels_formed_by_highs" ,
                      engine_for_btc_and_usdt_trading_pairs_db )
         print ( "\ntable dropped\n" )
         # time.sleep ( 1000 )
@@ -131,6 +131,8 @@ def find_levels_formed_by_highs_and_lows():
                                                           'exchange' ,
                                                           'level_formed_by_high' ,
                                                           'average_volume','timestamp_1','timestamp_2','timestamp_3'] )
+
+
 
     for table_in_db in list_of_tables:
         counter_for_tables = counter_for_tables + 1
@@ -182,16 +184,16 @@ def find_levels_formed_by_highs_and_lows():
                                                        keep = False ).sum () == len ( last_several_days_slice_df ):
                 print ( f"all duplicated highs are found in {usdt_pair} on {exchange}" )
                 continue
-            # print ( "last_several_days_slice_df=\n" , last_several_days_slice_df )
+            # print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
             #
-            #print ( "last_several_days_slice_df=\n" , last_several_days_slice_df )
+            #print ( "last_several_days_slice_df=\n" , last_several_days_slice_df.to_string () )
             # last_several_days_highs_slice_Series = \
             #     last_several_days_slice_df['high'].squeeze ()
             # last_several_days_lows_slice_Series = \
             #     last_several_days_slice_df['low'].squeeze ()
             # print (type(last_several_days_lows_slice_Series))
             # print ( "last_several_days_lows_slice_Series=\n" ,
-            #         last_several_days_lows_slice_Series )
+            #         last_several_days_lows_slice_Series.to_string () )
 
             #iterate over each date and check if highs coincide
             # for row_number_in_highs in range ( last_several_days_highs_slice_Series.size ):
@@ -231,18 +233,9 @@ def find_levels_formed_by_highs_and_lows():
             # #data_df["counts_of_lows"] = data_df["low"].value_counts ()
             # print("data_df\n", data_df)
             #
-
-            so_many_last_days_for_level_calculation = 30
+            so_many_last_days_for_level_calculation=30
             so_many_number_of_touches_of_level_by_highs=2
             so_many_number_of_touches_of_level_by_lows = 2
-
-            print("\nso_many_last_days_for_level_calculation=",
-                  so_many_last_days_for_level_calculation)
-
-
-
-
-
 
             #
             #
@@ -309,7 +302,7 @@ def find_levels_formed_by_highs_and_lows():
                                 counter_for_usdt_pair_with_low)
                         # list_of_pairs_and_exchanges_with_touches_of_level_by_low.append (
                         #     f"{usdt_pair} on {exchange}" )
-                        #print ( data_df_slice_plus_number_of_equal_lows_and_highs )
+                        #print ( data_df_slice_plus_number_of_equal_lows_and_highs.to_string () )
                         print (f"in trading pair {usdt_pair} on {exchange} the number"
                                f" of touches by lows is equal to {number_of_touches_by_low}")
                         print ( "data_df_slice_plus_number_of_equal_lows_and_highs\n" )
@@ -345,7 +338,7 @@ def find_levels_formed_by_highs_and_lows():
                                 f" of touches by highs is equal to {number_of_touches_by_high}" )
                         # list_of_pairs_and_exchanges_with_touches_of_level_by_high.append(f"{usdt_pair} on {exchange}")
                         # print ( "data_df_slice_plus_number_of_equal_lows_and_highs\n" )
-                        # print ( data_df_slice_plus_number_of_equal_lows_and_highs )
+                        # print ( data_df_slice_plus_number_of_equal_lows_and_highs.to_string () )
                         #counter_for_usdt_pair_with_high=counter_for_usdt_pair_with_high+1
                         #data_df_slice_plus_number_of_equal_lows_and_highs["high_level"] =  np.nan
 
@@ -355,10 +348,10 @@ def find_levels_formed_by_highs_and_lows():
                                 # print(data_df_slice_plus_number_of_equal_lows_and_highs["number_of_equal_highs"].iloc[row])
                                 data_df_slice_plus_number_of_equal_lows_and_highs["high_level"].iat[row] = \
                                     data_df_slice_plus_number_of_equal_lows_and_highs["high"].iat[row]
-                                # print ( data_df_slice_plus_number_of_equal_lows_and_highs )
+                                # print ( data_df_slice_plus_number_of_equal_lows_and_highs.to_string () )
 
                                 # print ( "data_df_slice_plus_number_of_equal_lows_and_highs_outside\n" )
-                                # print ( data_df_slice_plus_number_of_equal_lows_and_highs )
+                                # print ( data_df_slice_plus_number_of_equal_lows_and_highs.to_string () )
                                 if row==len ( data_df_slice_plus_number_of_equal_lows_and_highs )-1:
 
                                     print ( "data_df \n" , data_df )
@@ -514,7 +507,7 @@ def find_levels_formed_by_highs_and_lows():
                                                     levels_formed_by_lows_df.loc[counter_for_low_level_in_final_df - 1,f'timestamp_{counter_for_timestamp}'] = timestamp
 
                                                     print ( "levels_formed_by_lows_df" )
-                                                    print ( levels_formed_by_lows_df.to_string() )
+                                                    print ( levels_formed_by_lows_df )
 
 
                                     #####################++++++++++++++++++++----------++++++++++++++++++++++++#
@@ -773,97 +766,97 @@ def find_levels_formed_by_highs_and_lows():
                                     #####################++++++++++++++++++++----------++++++++++++++++++++++++#
 
 
-                                    # data_df_slice_plus_number_of_equal_highs_without_NaNs = \
-                                    #     data_df_slice_plus_number_of_equal_lows_and_highs.dropna ( subset =
-                                    #                                                                ["high_level"] ,
-                                    #                                                                how = "all" )
-                                    #
-                                    # print ( "data_df_slice_plus_number_of_equal_lows_without_NaNs\n" )
-                                    # print ( data_df_slice_plus_number_of_equal_lows_without_NaNs )
-                                    #
-                                    # print ( "data_df_slice_plus_number_of_equal_highs_without_NaNs\n" )
-                                    # print ( data_df_slice_plus_number_of_equal_highs_without_NaNs )
-                                    #
-                                    #
-                                    #
-                                    # boolian_list_if_all_closes_are_lower_than_prev_closes=[]
-                                    # boolian_list_if_all_closes_are_higher_than_prev_closes = []
-                                    # for row_backward in range(1,lower_closes_for_that_many_last_days):
-                                    #     print("row_backward=",row_backward)
-                                    #     current_close=data_df_slice_plus_number_of_equal_lows_and_highs["close"].iat[-row_backward]
-                                    #     prev_close = data_df_slice_plus_number_of_equal_lows_and_highs["close"].iat[
-                                    #         -row_backward-1]
-                                    #     # print ("current_close=",current_close)
-                                    #     # print ( "prev_close=" , prev_close )
-                                    #     if current_close<prev_close:
-                                    #         print ("current_close=",current_close)
-                                    #         print ( "prev_close=" , prev_close )
-                                    #         boolian_list_if_all_closes_are_lower_than_prev_closes.append(True)
-                                    #     else:
-                                    #         print("current_close > prev_close")
-                                    #         boolian_list_if_all_closes_are_lower_than_prev_closes.append ( False)
-                                    #
-                                    #
-                                    #     if current_close>prev_close:
-                                    #         print("current_close>=prev_close")
-                                    #         print ("current_close=",current_close)
-                                    #
-                                    #         print ( "prev_close=" , prev_close )
-                                    #         boolian_list_if_all_closes_are_higher_than_prev_closes.append(True)
-                                    #     else:
-                                    #         print("current_close < prev_close")
-                                    #         boolian_list_if_all_closes_are_higher_than_prev_closes.append ( False )
-                                    #
-                                    # print("boolian_list_if_all_closes_are_lower_than_prev_closes=",
-                                    #       boolian_list_if_all_closes_are_lower_than_prev_closes)
-                                    #
-                                    #
-                                    # if_pair_has_all_closes_lower_than_prev_closes=all(
-                                    #     boolian_list_if_all_closes_are_lower_than_prev_closes)
-                                    # print("if_pair_has_all_closes_lower_than_prev_closes",
+                                    data_df_slice_plus_number_of_equal_highs_without_NaNs = \
+                                        data_df_slice_plus_number_of_equal_lows_and_highs.dropna ( subset =
+                                                                                                   ["high_level"] ,
+                                                                                                   how = "all" )
+
+                                    print ( "data_df_slice_plus_number_of_equal_lows_without_NaNs\n" )
+                                    print ( data_df_slice_plus_number_of_equal_lows_without_NaNs )
+
+                                    print ( "data_df_slice_plus_number_of_equal_highs_without_NaNs\n" )
+                                    print ( data_df_slice_plus_number_of_equal_highs_without_NaNs )
+
+
+
+                                    boolian_list_if_all_closes_are_lower_than_prev_closes=[]
+                                    boolian_list_if_all_closes_are_higher_than_prev_closes = []
+                                    for row_backward in range(1,lower_closes_for_that_many_last_days):
+                                        print("row_backward=",row_backward)
+                                        current_close=data_df_slice_plus_number_of_equal_lows_and_highs["close"].iat[-row_backward]
+                                        prev_close = data_df_slice_plus_number_of_equal_lows_and_highs["close"].iat[
+                                            -row_backward-1]
+                                        # print ("current_close=",current_close)
+                                        # print ( "prev_close=" , prev_close )
+                                        if current_close<prev_close:
+                                            print ("current_close=",current_close)
+                                            print ( "prev_close=" , prev_close )
+                                            boolian_list_if_all_closes_are_lower_than_prev_closes.append(True)
+                                        else:
+                                            print("current_close > prev_close")
+                                            boolian_list_if_all_closes_are_lower_than_prev_closes.append ( False)
+
+
+                                        if current_close>prev_close:
+                                            print("current_close>=prev_close")
+                                            print ("current_close=",current_close)
+
+                                            print ( "prev_close=" , prev_close )
+                                            boolian_list_if_all_closes_are_higher_than_prev_closes.append(True)
+                                        else:
+                                            print("current_close < prev_close")
+                                            boolian_list_if_all_closes_are_higher_than_prev_closes.append ( False )
+
+                                    print("boolian_list_if_all_closes_are_lower_than_prev_closes=",
+                                          boolian_list_if_all_closes_are_lower_than_prev_closes)
+
+
+                                    if_pair_has_all_closes_lower_than_prev_closes=all(
+                                        boolian_list_if_all_closes_are_lower_than_prev_closes)
+                                    print("if_pair_has_all_closes_lower_than_prev_closes",
+                                          if_pair_has_all_closes_lower_than_prev_closes)
+                                    # print(f"for trading pair {usdt_pair} on {exchange} closes_are_lower_than_prev_closes",
                                     #       if_pair_has_all_closes_lower_than_prev_closes)
-                                    # # print(f"for trading pair {usdt_pair} on {exchange} closes_are_lower_than_prev_closes",
-                                    # #       if_pair_has_all_closes_lower_than_prev_closes)
-                                    # if if_pair_has_all_closes_lower_than_prev_closes:
-                                    #     # print (f"outer for trading pair {usdt_pair} on {exchange} "
-                                    #     #        f"closes_are_lower_than_prev_closes ready for break down" )
-                                    #     if not all(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull()):
-                                    #         print (
-                                    #             'data_df_slice_plus_number_of_equal_lows_and_highs["low_level"]\n' )
-                                    #         print ( data_df_slice_plus_number_of_equal_lows_and_highs["low_level"] )
-                                    #         print (
-                                    #             'data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull()\n' )
-                                    #         print ( data_df_slice_plus_number_of_equal_lows_and_highs[
-                                    #                     "low_level"].isnull () )
-                                    #         print (
-                                    #             'all(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull())\n' )
-                                    #         print ( all ( data_df_slice_plus_number_of_equal_lows_and_highs[
-                                    #                           "low_level"].isnull () ) )
-                                    #
-                                    #         print ( f"for trading pair {usdt_pair} on {exchange} "
-                                    #                 f"closes_are_lower_than_prev_closes ready for break down" )
-                                    #
-                                    #
-                                    # print ( "boolian_list_if_all_closes_are_higher_than_prev_closes=" ,
-                                    #         boolian_list_if_all_closes_are_higher_than_prev_closes )
-                                    #
-                                    #
-                                    # set_of_low_levels=\
-                                    #     set(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].dropna().to_list())
-                                    # print ( "set_of_low_levels\n" ,
-                                    #         list(set_of_low_levels) )
-                                    # if len(set_of_low_levels) != 0:
-                                    #     list_of_pairs_and_exchanges_with_touches_of_level_by_low.append (
-                                    #         f"{usdt_pair} on {exchange} with low levels at {set_of_low_levels} " )
-                                    #
-                                    # set_of_high_levels = \
-                                    #     set ( data_df_slice_plus_number_of_equal_lows_and_highs[
-                                    #               "high_level"].dropna ().to_list () )
-                                    # print ( "set_of_high_levels\n" ,
-                                    #         list(set_of_high_levels) )
-                                    # if len ( set_of_high_levels ) != 0:
-                                    #     list_of_pairs_and_exchanges_with_touches_of_level_by_high.append (
-                                    #         f"{usdt_pair} on {exchange} with high levels at {set_of_high_levels} " )
+                                    if if_pair_has_all_closes_lower_than_prev_closes:
+                                        # print (f"outer for trading pair {usdt_pair} on {exchange} "
+                                        #        f"closes_are_lower_than_prev_closes ready for break down" )
+                                        if not all(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull()):
+                                            print (
+                                                'data_df_slice_plus_number_of_equal_lows_and_highs["low_level"]\n' )
+                                            print ( data_df_slice_plus_number_of_equal_lows_and_highs["low_level"] )
+                                            print (
+                                                'data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull()\n' )
+                                            print ( data_df_slice_plus_number_of_equal_lows_and_highs[
+                                                        "low_level"].isnull () )
+                                            print (
+                                                'all(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].isnull())\n' )
+                                            print ( all ( data_df_slice_plus_number_of_equal_lows_and_highs[
+                                                              "low_level"].isnull () ) )
+
+                                            print ( f"for trading pair {usdt_pair} on {exchange} "
+                                                    f"closes_are_lower_than_prev_closes ready for break down" )
+
+
+                                    print ( "boolian_list_if_all_closes_are_higher_than_prev_closes=" ,
+                                            boolian_list_if_all_closes_are_higher_than_prev_closes )
+
+
+                                    set_of_low_levels=\
+                                        set(data_df_slice_plus_number_of_equal_lows_and_highs["low_level"].dropna().to_list())
+                                    print ( "set_of_low_levels\n" ,
+                                            list(set_of_low_levels) )
+                                    if len(set_of_low_levels) != 0:
+                                        list_of_pairs_and_exchanges_with_touches_of_level_by_low.append (
+                                            f"{usdt_pair} on {exchange} with low levels at {set_of_low_levels} " )
+
+                                    set_of_high_levels = \
+                                        set ( data_df_slice_plus_number_of_equal_lows_and_highs[
+                                                  "high_level"].dropna ().to_list () )
+                                    print ( "set_of_high_levels\n" ,
+                                            list(set_of_high_levels) )
+                                    if len ( set_of_high_levels ) != 0:
+                                        list_of_pairs_and_exchanges_with_touches_of_level_by_high.append (
+                                            f"{usdt_pair} on {exchange} with high levels at {set_of_high_levels} " )
 
 
                             else:
@@ -905,10 +898,10 @@ def find_levels_formed_by_highs_and_lows():
     print ( "levels_formed_by_highs_df" )
     print ( levels_formed_by_highs_df )
 
-    levels_formed_by_lows_df.to_sql ( "levels_formed_by_lows" ,
+    levels_formed_by_lows_df.to_sql ( "rounded_levels_formed_by_lows" ,
                              connection_to_btc_and_usdt_trading_pairs ,
                              if_exists = 'replace' , index = False )
-    levels_formed_by_highs_df.to_sql ( "levels_formed_by_highs" ,
+    levels_formed_by_highs_df.to_sql ( "rounded_levels_formed_by_highs" ,
                                       connection_to_btc_and_usdt_trading_pairs ,
                                       if_exists = 'replace' , index = False )
 

@@ -1,4 +1,4 @@
-import sqlite3
+
 import pandas as pd
 import os
 import time
@@ -6,67 +6,132 @@ import datetime
 import traceback
 import datetime as dt
 import tzlocal
-def drop_table_from_database(table_name,path_to_database):
-    conn=sqlite3.connect(path_to_database)
-    cur=conn.cursor()
-    cur.execute('drop table if exists {}'.format(table_name))
-    conn.commit()
-    conn.close()
 
-def find_mirror_levels_in_database(async_var):
+from sqlalchemy_utils import create_database,database_exists
+import db_config
+# from sqlalchemy import MetaData
+from sqlalchemy import inspect
+import logging
+from sqlalchemy import MetaData
+from sqlalchemy import create_engine
+from sqlalchemy.engine.url import URL
+from sqlalchemy.ext.declarative import declarative_base
+
+
+
+def connect_to_postres_db(database = "btc_and_usdt_pairs_from_all_exchanges"):
+    dialect = db_config.dialect
+    driver = db_config.driver
+    password = db_config.password
+    user = db_config.user
+    host = db_config.host
+    port = db_config.port
+
+    dummy_database = db_config.dummy_database
+
+    engine = create_engine ( f"{dialect}+{driver}://{user}:{password}@{host}:{port}/{database}" ,
+                             isolation_level = 'AUTOCOMMIT' , echo = True )
+    print ( f"{engine} created successfully" )
+
+    # Create database if it does not exist.
+    if not database_exists ( engine.url ):
+        create_database ( engine.url )
+        print ( f'new database created for {engine}' )
+        connection=engine.connect ()
+        print ( f'Connection to {engine} established after creating new database' )
+
+    connection = engine.connect ()
+
+    print ( f'Connection to {engine} established. Database already existed.'
+            f' So no new db was created' )
+    return engine , connection
+
+
+
+
+def drop_table(table_name,engine):
+    engine.execute (
+        f"DROP TABLE IF EXISTS {table_name};" )
+
+    # base = declarative_base()
+    # metadata = MetaData(engine)
+    #
+    # table = metadata.tables.get(table_name)
+    # if table is not None:
+    #    logging.info(f'Deleting {table_name} table')
+    #    base.metadata.drop_all(engine, [table], checkfirst=True)
+
+
+
+def find_mirror_levels_in_database():
     start_time = time.time ()
 
 
 
-    connection_to_usdt_trading_pairs_ohlcv = \
-        sqlite3.connect ( os.path.join ( os.getcwd () ,
-                                         "datasets" ,
-                                         "sql_databases" ,
-                                         "all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
+    engine_for_usdt_trading_pairs_ohlcv_db, connection_to_usdt_trading_pairs_ohlcv =\
+        connect_to_postres_db("async_rounded_ohlcv_data_for_usdt_trading_pairs")
+    ###############################################33
+    ###############################################
+
+    lower_timeframe_for_mirror_level_rebound_trading='1h'
+
+    #############################################
+    #############################################
+
+    # list_of_tables_from_sql_query=engine_for_usdt_trading_pairs_ohlcv_db.execute ( '''SELECT table_name
+    #                                                     FROM information_schema.tables
+    #                                                     WHERE table_schema='public'
+    #                                                     AND table_type='BASE TABLE';''' )
+
+    # print("list_of_tables_from_sql_query\n")
+    # print(list_of_tables_from_sql_query)
+
+    # print("metadata.reflect(engine)\n")
+    inspector = inspect ( engine_for_usdt_trading_pairs_ohlcv_db )
+    # print(metadata.reflect(engine_for_usdt_trading_pairs_ohlcv_db))
+    # print(inspector.get_table_names())
+    list_of_tables_from_sql_query=inspector.get_table_names()
+    # print ( "list_of_tables_from_sql_query\n" )
+    # print ( list_of_tables_from_sql_query )
 
 
-
-    #async_var = True
-    if async_var==True:
-        connection_to_usdt_trading_pairs_ohlcv = \
-            sqlite3.connect ( os.path.join ( os.getcwd () ,
-                                             "datasets" ,
-                                             "sql_databases" ,
-                                             "async_all_exchanges_multiple_tables_historical_data_for_usdt_trading_pairs.db" ) )
-
-    cursor=connection_to_usdt_trading_pairs_ohlcv.cursor()
-    cursor.execute ( "SELECT name FROM sqlite_master WHERE type='table';" )
-
-    list_of_tables_from_sql_query=cursor.fetchall ()
     list_of_tables=[]
     #open_connection to database with mirror levels
-    path_to_db_with_USDT_and_btc_pairs = os.path.join ( os.getcwd () , "datasets" ,
-                                                        "sql_databases" ,
-                                                        "btc_and_usdt_pairs_from_all_exchanges.db" )
+    engine_for_btc_and_usdt_trading_pairs_db , connection_to_btc_and_usdt_trading_pairs = \
+        connect_to_postres_db ( "btc_and_usdt_pairs_from_all_exchanges" )
 
-    connection_to_btc_and_usdt_trading_pairs = \
-        sqlite3.connect ( path_to_db_with_USDT_and_btc_pairs )
+
     mirror_level_df = pd.DataFrame ( columns = ['USDT_pair' , 'exchange' , 'mirror_level' ,
                                                 'timestamp_for_low' , 'timestamp_for_high' ,
                                                 'low' , 'high' , 'open_time_of_candle_with_legit_low' ,
                                                 'open_time_of_candle_with_legit_high','average_volume'] )
     try:
-        drop_table_from_database ( "mirror_levels_calculated_separately" ,
-                                   path_to_db_with_USDT_and_btc_pairs )
-    except:
-        print ( "cant drop table from db" )
+        drop_table ( "rounded_mirror_levels_calculated_separately" ,
+                                   engine_for_btc_and_usdt_trading_pairs_db )
+        print ("\ntable dropped\n")
+        #time.sleep ( 1000 )
+    except Exception as e:
+        print ( "cant drop table from db\n",e )
+        #time.sleep(1000)
 
-
-    for table_in_db in list_of_tables_from_sql_query:
-        #print(table_in_db[0])
-        list_of_tables.append(table_in_db[0])
+####################################################################
+    ##################################################################
+    list_of_tables=list_of_tables_from_sql_query
+    # for table_in_db in list_of_tables_from_sql_query:
+    #     #print(table_in_db[0])
+    #     list_of_tables.append(table_in_db[0])
 
     print(list_of_tables)
+
+    #------------------------------------------------
     counter=0
     discard_pair_by_volume_counter = 0
     this_many_last_days=90
     calculate_average_volume_for_this_many_days=30
     volume_limit=100000
+    #-------------------------------------------------
+
+
     for table_in_db in list_of_tables:
         try:
             counter=counter+1
@@ -120,8 +185,8 @@ def find_mirror_levels_in_database(async_var):
 
             for row_number_in_highs in range ( last_several_days_highs_slice_Series.size ):
                 for row_number_in_lows in range ( last_several_days_lows_slice_Series.size ):
-                    daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs ]
-                    daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows ]
+                    daily_high = last_several_days_highs_slice_Series.iloc[row_number_in_highs - 1]
+                    daily_low = last_several_days_lows_slice_Series.iloc[row_number_in_lows - 1]
                     if daily_high == daily_low:
                         # print ( "daily_low\n" ,
                         #         daily_low )
@@ -195,9 +260,18 @@ def find_mirror_levels_in_database(async_var):
 
 
 
-                                        mirror_level_df.to_sql ( "mirror_levels_calculated_separately" ,
+
+
+                                        mirror_level_df.to_sql ( "rounded_mirror_levels_calculated_separately" ,
                                                                  connection_to_btc_and_usdt_trading_pairs ,
                                                                  if_exists = 'append' , index = False )
+
+                                        # timestamp_for_low=tuple_of_legit_low_level[0]
+                                        # timestamp_for_high = tuple_of_legit_high_level[0]
+                                        # mirror_level=daily_low
+
+
+
 
                         pass
         except Exception as e:
@@ -214,5 +288,5 @@ def find_mirror_levels_in_database(async_var):
     print ( 'start_time=' , start_time )
     print ( 'end_time=' , end_time )
 if __name__=="__main__":
-    async_var=True
-    find_mirror_levels_in_database(async_var)
+
+    find_mirror_levels_in_database()
